@@ -1,0 +1,46 @@
+{
+  "name": "cli_test",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.8",
+    "@fullcalendar/daygrid": "^6.1.8",
+    "@fullcalendar/interaction": "^6.1.8",
+    "@fullcalendar/list": "^6.1.8",
+    "@fullcalendar/multimonth": "^6.1.8",
+    "@fullcalendar/resource": "^6.1.8",
+    "@fullcalendar/resource-timeline": "^6.1.8",
+    "@fullcalendar/timegrid": "^6.1.8",
+    "@fullcalendar/timeline": "^6.1.8",
+    "@fullcalendar/vue": "^6.1.8",
+    "@open-wc/webpack-import-meta-loader": "^0.4.7",
+    "@types/three": "^0.146.0",
+    "caniuse-lite": "^1.0.30001508",
+    "core-js": "^3.8.3",
+    "element-ui": "^2.15.13",
+    "image-conversion": "^2.1.1",
+    "luckyexcel": "^1.0.1",
+    "three": "^0.146.0",
+    "v-viewer": "^1.6.4",
+    "vue": "^2.6.14",
+    "vue-router": "^3.5.1",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "^5.0.0",
+    "@vue/cli-plugin-eslint": "^5.0.0",
+    "@vue/cli-service": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "node-sass": "^4.14.1",
+    "sass-loader": "^7.3.1",
+    "vue-template-compiler": "^2.6.14"
+  }
+}
