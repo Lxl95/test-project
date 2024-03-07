@@ -32,7 +32,7 @@ const routes = [
     component: () => import('../views/2023_7/elFormValid.vue'),
     meta: {
       name: 'test',
-      title: '测试下拉弹框关闭'
+      title: '多表单校验'
     }
   },
   {
@@ -41,7 +41,7 @@ const routes = [
     component: () => import('../views/2023_7/imgSelect.vue'),
     meta: {
       name: 'imgSelect',
-      title: '测试图片选中'
+      title: '图片选中'
     }
   },
   {
@@ -77,7 +77,7 @@ const routes = [
     component: () => import('../views/2023_7/FullCalendar2.vue'),
     meta: {
       name: 'FullCalendar',
-      title: 'FullCalendar.js'
+      title: 'FullCalendar'
     }
   },
   {
@@ -86,7 +86,7 @@ const routes = [
     component: () => import('../views/2023_7/testTreeTable.vue'),
     meta: {
       name: 'home',
-      title: '测试树状表格'
+      title: '树状表格'
     }
   },
   {
@@ -95,7 +95,16 @@ const routes = [
     component: () => import('../views/Cesium/testCesium.vue'),
     meta: {
       name: 'testCesium',
-      title: '测试Cesium'
+      title: 'Cesium'
+    }
+  },
+  {
+    path: '/monacoEditor',
+    name: 'monacoEditor',
+    component: () => import('../views/2024_3/testMonacoEditor.vue'),
+    meta: {
+      name: 'monacoEditor',
+      title: 'monacoEditor'
     }
   }
 ];
