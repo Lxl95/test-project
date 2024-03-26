@@ -19,18 +19,25 @@
     <div class="right-content">
       <button @click="runCode">运行</button>
       <p>实现结果：</p>
-      <iframe class="view-panel" id="preview" frameborder="0"></iframe>
+      <!-- <iframe class="view-panel" id="preview" frameborder="0"></iframe> -->
+      <div id="iframewrapper"></div>
     </div>
   </div>
 </template>
 
 <script>
 import MonacoEdito from './monacoEditor.vue';
+import Vue from 'vue';
 
 export default {
   name: 'app',
   components: {
     MonacoEdito
+  },
+  data() {
+    return {
+      show: false
+    };
   },
   mounted() {
     this.initValue();
@@ -38,13 +45,15 @@ export default {
   methods: {
     initValue() {
       var htmlString = `<div class="my-box">
-  一段文本内容
+  一段文本内容{{name}}
+  <el-button type="warning">警告按钮</el-button>
+  <el-button type="danger">危险按钮</el-button>
 </div>`;
       var cssString = `.my-box {
   font-size: 20px;
   color: red;
 }`;
-      var jsString = `alert('打开弹框')`;
+      var jsString = `alert('打开弹框');`;
       // 调用monaco组件的方法，设置monaco编辑器的值
       this.$nextTick(() => {
         this.$refs.html.setEditorValue(htmlString);
@@ -56,7 +65,7 @@ export default {
       var html = this.$refs.html.getEditorValue();
       var css = this.$refs.css.getEditorValue();
       var js = this.$refs.js.getEditorValue();
-      let code = `
+      var text = `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -65,15 +74,101 @@ export default {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Editor</title>
         <style>${css}</style>
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="/vue/element-ui/lib/theme-chalk/index.css">
+        <script src="/vue/vue.min.js"><\/script>
+        <!-- 引入组件库 -->
+        <script src="/vue/element-ui/lib/index.js"><\/script>
         </head>
-        <body>${html}</body>
+        <body id="app">${html}</body>
         <script>${js}<\/script>
+        <script>
+        // Vue.use(ELEMENT)
+         const app = new Vue({
+          el: '#app',
+          // template: '',
+          data: {
+        name: '小猪猪'
+      }
+         })
+          console.log(app);
+        <\/script>
         </html>
        `;
-      console.log(code);
-      const preview = document.getElementById('preview');
-      preview.setAttribute('srcdoc', code);
+      var patternHtml = /<html[^>]*>((.|[\n\r])*)<\/html>/im;
+      var patternHead = /<head[^>]*>((.|[\n\r])*)<\/head>/im;
+      var array_matches_head = patternHead.exec(text);
+      var patternBody = /<body[^>]*>((.|[\n\r])*)<\/body>/im;
+
+      var array_matches_body = patternBody.exec(text);
+      var basepath_flag = 1;
+      var basepath = '';
+      if (basepath_flag) {
+        basepath = '<base href="/public" target="_blank">';
+      }
+      if (array_matches_head) {
+        text = text.replace('<head>', '<head>' + basepath);
+      } else if (patternHtml) {
+        text = text.replace('<html>', '<head>' + basepath + '</head>');
+      } else if (array_matches_body) {
+        text = text.replace('<body>', '<body>' + basepath);
+      } else {
+        text = basepath + text;
+      }
+      var ifr = document.createElement('iframe');
+      ifr.setAttribute('frameborder', '0');
+      ifr.setAttribute('id', 'iframeResult');
+
+      document.getElementById('iframewrapper').innerHTML = '';
+      document.getElementById('iframewrapper').appendChild(ifr);
+
+      var ifrw = ifr.contentWindow ? ifr.contentWindow : ifr.contentDocument.document ? ifr.contentDocument.document : ifr.contentDocument;
+      ifrw.document.open();
+      console.log(text);
+
+      ifrw.document.write(text);
+      ifrw.document.close();
+      // autodivheight();
     }
+
+    // runCode() {
+    //   var html = this.$refs.html.getEditorValue();
+    //   var css = this.$refs.css.getEditorValue();
+    //   var js = this.$refs.js.getEditorValue();
+    //   let code = `
+    //     <!DOCTYPE html>
+    //     <html lang="en">
+    //     <head>
+    //     <meta charset="UTF-8">
+    //     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    //     <title>Editor</title>
+    //     <style>${css}</style>
+    //     <!-- 引入样式 -->
+    //     <link rel="stylesheet" href="/vue/element-ui/lib/theme-chalk/index.css">
+    //     <script src="/vue/vue.min.js"><\/script>
+    //     <!-- 引入组件库 -->
+    //     <script src="/vue/element-ui/lib/index.js"><\/script>
+    //     </head>
+    //     <body id="app">${html}</body>
+    //     <script>${js}<\/script>
+    //     <script>
+    //     Vue.use(ELEMENT)
+    //      const app = new Vue({
+    //       el: '#app',
+    //       // template: '',
+    //       data: {
+    //     name: '小猪猪'
+    //   }
+    //      })
+    //       console.log(app);
+    //     <\/script>
+    //     </html>
+    //    `;
+    //   console.log(code);
+    //   const preview = document.getElementById('preview');
+    //   preview.setAttribute('srcdoc', code);
+    // }
   }
 };
 </script>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #poster{
+            width: 700px; 
+            height: 500px;
+            background-color: green;
+        }
+    </style>
+    <script type="text/javascript" src="http://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script type="text/javascript">
+        function takeScreenshot() {
+            const node = document.getElementById('poster')
+            html2canvas(node, {
+                useCORS: true,
+                height: node.offsetHeight,
+                width: node.offsetWidth,
+                scrollY: 0,
+                scrollX: 0
+            }).then(async (canvas) => {
+                let oImg = new Image();
+                oImg.src = canvas.toDataURL();  // 导出图片
+                document.body.appendChild(oImg);  // 将生成的图片添加到body
+            })
+        }
+    </script>
+</head>
+<body>
+    <div id="poster">
+        <input type="button" value="截图" onclick="takeScreenshot()">
+    </div>
+</body>
+</html>

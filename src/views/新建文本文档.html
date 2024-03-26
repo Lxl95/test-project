@@ -9,6 +9,7 @@
   <body>
     <!--主体-->
     <section id="content">
+      <img class="small_image" style="vertical-align: middle; width: 100%" src="https://web2.xmyeditor.com/sucai-gif/20220924/6a233eada392473713dfeb07ea8d707a.gif" />
       <!--头部-->
       <div class="content-header clearfix">
         <a href="javaScript:;" class="current">我要登录</a>
@@ -56,35 +57,19 @@
           <form action="">
             <div class="s1">
               <h4>手机号码</h4>
-              <input
-                type="text"
-                name="phone"
-                placeholder="填写你的手机号码作为登录账号"
-              />
+              <input type="text" name="phone" placeholder="填写你的手机号码作为登录账号" />
             </div>
             <div class="s1">
               <h4>用户名</h4>
-              <input
-                type="text"
-                name="user"
-                placeholder="中、英文均可，最长20个字符或10个汉字"
-              />
+              <input type="text" name="user" placeholder="中、英文均可，最长20个字符或10个汉字" />
             </div>
             <div class="s1">
               <h4>密码</h4>
-              <input
-                type="password"
-                name="password"
-                placeholder="6-30位英文、数字、符号、区分大小写"
-              />
+              <input type="password" name="password" placeholder="6-30位英文、数字、符号、区分大小写" />
             </div>
             <div class="s1">
               <h4>确认密码</h4>
-              <input
-                type="password"
-                name="password"
-                placeholder="6-30位英文、数字、符号、区分大小写"
-              />
+              <input type="password" name="password" placeholder="6-30位英文、数字、符号、区分大小写" />
             </div>
             <!-- <div class="s1 msg-code">
               <h4>短信验证码</h4>
@@ -119,27 +104,25 @@
     </section>
     <script type="application/javascript">
       window.onload = function () {
-        let as = document
-          .getElementsByClassName('content-header')[0]
-          .getElementsByTagName('a')
-        let contents = document.getElementsByClassName('dom')
+        let as = document.getElementsByClassName('content-header')[0].getElementsByTagName('a');
+        let contents = document.getElementsByClassName('dom');
         for (let i = 0; i < as.length; i++) {
-          let a = as[i]
-          a.id = i
+          let a = as[i];
+          a.id = i;
           // 设置每个a标签的onclick事件
           a.onclick = function () {
             // 清楚所有标签的css设置，隐藏dom标签
             for (let j = 0; j < as.length; j++) {
-              as[j].className = ''
-              contents[j].style.display = 'none'
+              as[j].className = '';
+              contents[j].style.display = 'none';
             }
             // 设置当前标签样式及当前标签下的所有dom标签可见
-            this.className = 'current'
+            this.className = 'current';
             // 当前div可见
-            contents[this.id].style.display = 'block'
-          }
+            contents[this.id].style.display = 'block';
+          };
         }
-      }
+      };
     </script>
   </body>
 </html>

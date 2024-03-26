@@ -18,6 +18,10 @@ export default {
       type: String,
       default: ''
     },
+    theme: {
+      type: String,
+      default: 'hc-dark'
+    },
     width: {
       type: String,
       default: '500px'
@@ -39,7 +43,7 @@ export default {
     init() {
       // 使用 - 创建 monacoEditor 对象
       this.monacoEditor = monaco.editor.create(this.$refs.mainEditor, {
-        theme: 'vs-dark', // 主题
+        theme: this.theme, // 主题 vs-dark, vs, hc-black
         value: this.editorValue, // 默认显示的值
         language: this.language,
         folding: true, // 是否折叠
@@ -87,18 +91,26 @@ export default {
       this.monacoEditor.onDidBlurEditorText(e => {
         console.log('失去焦点', e);
       });
+      // 在划选过程中打印选中的值
+      this.monacoEditor.onDidChangeCursorSelection(e => {
+        const model = this.monacoEditor.getModel();
+        let select = this.monacoEditor.getSelection();
+        console.log('选中', model.getValueInRange(select));
+      });
+      // // 设置主题
+      console.log(this.theme);
+      monaco.editor.setTheme('vs-dark');
     },
     // 设置并获取monaco编辑器的值
-    setEditorValue(data) {
-      const newModel = monaco.editor.createModel(
-        data, // 值
-        this.language // 语言
-      );
-      this.monacoEditor.setModel(newModel);
+    setEditorValue(newValue) {
+      // const newModel = monaco.editor.createModel(
+      //   data, // 值
+      //   this.language // 语言
+      // );
+      // this.monacoEditor.setModel(newModel);
       // 设置自定义的主题背景色
       // monaco.editor.setTheme('CodeSampleTheme');
-      // 获取monaco编辑器的值
-      // this.editorValue = this.monacoEditor.getValue();
+      this.monacoEditor.setValue(newValue);
     },
     getEditorValue() {
       return this.monacoEditor.getValue();

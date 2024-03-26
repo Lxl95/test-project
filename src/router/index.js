@@ -106,6 +106,24 @@ const routes = [
       name: 'monacoEditor',
       title: 'monacoEditor'
     }
+  },
+  {
+    path: '/FakeProgress',
+    name: 'FakeProgress',
+    component: () => import('../views/2024_3/testFake.vue'),
+    meta: {
+      name: 'FakeProgress',
+      title: 'FakeProgress'
+    }
+  },
+  {
+    path: '/codeView',
+    name: 'codeView',
+    component: () => import('../views/2024_3/codeView.vue'),
+    meta: {
+      name: 'codeView',
+      title: 'codeView'
+    }
   }
 ];
 
