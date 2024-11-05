@@ -124,6 +124,24 @@ const routes = [
       name: 'codeView',
       title: 'codeView'
     }
+  },
+  {
+    path: '/titleCSS',
+    name: 'titleCSS',
+    component: () => import('../views/2024_10/titleCSS.vue'),
+    meta: {
+      name: 'titleCSS',
+      title: 'titleCSS'
+    }
+  },
+  {
+    path: '/html2pdf',
+    name: 'html2pdf',
+    component: () => import('../views/2024_10/html2pdf.vue'),
+    meta: {
+      name: 'html2pdf',
+      title: 'html2pdf'
+    }
   }
 ];
 

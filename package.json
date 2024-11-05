@@ -24,6 +24,7 @@
     "core-js": "^3.8.3",
     "element-ui": "^2.15.13",
     "fake-progress": "^1.0.4",
+    "html2pdf.js": "^0.10.2",
     "image-conversion": "^2.1.1",
     "luckyexcel": "^1.0.1",
     "three": "^0.146.0",
