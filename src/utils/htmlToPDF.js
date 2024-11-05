@@ -3,8 +3,8 @@ import html2Canvas from 'html2canvas'
 import jsPDF from 'jspdf'
  
 const htmlToPdf = {
-    getPdf(title,div,url) {
-        html2Canvas(document.querySelector('#pdfDom' || div), {
+    getPdf(title,dom,url) {
+        html2Canvas(dom, {
             allowTaint: false,
             taintTest: false,
             logging: false,

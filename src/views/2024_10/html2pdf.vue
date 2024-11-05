@@ -1,7 +1,8 @@
 <template>
   <div>
     <el-button @click="generatePdf2">Generate PDF2</el-button>
-    <div id="pdfDom" ref="contentToConvert">
+
+    <div id="pdfDom" ref="contentToConvert" style="position:fixed;z-index: -2000;top:2000px;width:100vw">
       <!-- 这里放置你想要转换为PDF的内容 -->
       <h1>Hello, World!</h1>
       <p>This is a sample content to convert into PDF.</p>
@@ -178,12 +179,10 @@ export default {
   name: 'PdfGenerator',
   methods: {
     generatePdf2() {
-      htmlToPdf.getPdf('下载名称');
+      htmlToPdf.getPdf('下载名称', this.$refs.contentToConvert);
     }
   }
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
