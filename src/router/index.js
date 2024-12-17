@@ -15,23 +15,23 @@ const routes = [
     }
   },
   {
-    path: '/about',
-    name: 'about',
+    path: '/about3D',
+    name: 'about3D',
     // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
+    // this generates a separate chunk (about3D.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
+    component: () => import(/* webpackChunkName: "about3D" */ '../views/3D机房.vue'),
     meta: {
-      name: 'about',
+      name: 'about3D',
       title: '3D机房'
     }
   },
   {
-    path: '/test',
-    name: 'test',
+    path: '/elFormValid',
+    name: 'elFormValid',
     component: () => import('../views/2023_7/elFormValid.vue'),
     meta: {
-      name: 'test',
+      name: 'elFormValid',
       title: '多表单校验'
     }
   },
@@ -47,7 +47,7 @@ const routes = [
   {
     path: '/testDialog',
     name: 'testDialog',
-    component: () => import('../views/11-23/testDialog.vue'),
+    component: () => import('../views/弹框最小化/testDialog.vue'),
     meta: {
       name: 'testDialog',
       title: '弹框最小化'
@@ -56,7 +56,7 @@ const routes = [
   {
     path: '/imageCompress',
     name: 'imageCompress',
-    component: () => import('../views/12-4/imageCompress.vue'),
+    component: () => import('../views/图片压缩/imageCompress.vue'),
     meta: {
       name: 'imageCompress',
       title: '图片压缩'
@@ -77,7 +77,7 @@ const routes = [
     component: () => import('../views/2023_7/FullCalendar2.vue'),
     meta: {
       name: 'FullCalendar',
-      title: 'FullCalendar'
+      title: 'FullCalendar日历'
     }
   },
   {
@@ -85,8 +85,17 @@ const routes = [
     name: 'testTreeTable',
     component: () => import('../views/2023_7/testTreeTable.vue'),
     meta: {
-      name: 'home',
+      name: 'testTreeTable',
       title: '树状表格'
+    }
+  },
+  {
+    path: '/selectScroll',
+    name: 'selectScroll',
+    component: () => import('../views/2023_7/selectScroll.vue'),
+    meta: {
+      name: 'selectScroll',
+      title: '滚动时关闭下拉框弹出层'
     }
   },
   {
@@ -141,6 +150,96 @@ const routes = [
     meta: {
       name: 'html2pdf',
       title: 'html2pdf'
+    }
+  },
+  {
+    path: '/ImageViewer',
+    name: 'ImageViewer',
+    component: () => import('../views/ImageViewer.vue'),
+    meta: {
+      name: 'ImageViewer',
+      title: '图片预览'
+    }
+  },
+  {
+    path: '/tableTest',
+    name: 'tableTest',
+    component: () => import('../views/tableTest.vue'),
+    meta: {
+      name: 'tableTest',
+      title: 'elTable自定义勾选列'
+    }
+  },
+  {
+    path: '/testExcel',
+    name: 'testExcel',
+    component: () => import('../views/testExcel.vue'),
+    meta: {
+      name: 'testExcel',
+      title: '预览Excel'
+    }
+  },
+  {
+    path: '/testBpm',
+    name: 'testBpm',
+    component: () => import('../views/testBpm.vue'),
+    meta: {
+      name: 'testBpm',
+      title: '原生流程图'
+    }
+  },
+  {
+    path: '/testSpan',
+    name: 'testSpan',
+    component: () => import('../views/testSpan.vue'),
+    meta: {
+      name: 'testSpan',
+      title: '表格单元格合并'
+    }
+  },
+  {
+    path: '/testTree',
+    name: 'testTree',
+    component: () => import('../views/testTree.vue'),
+    meta: {
+      name: 'testTree',
+      title: '树形选择器'
+    }
+  },
+  {
+    path: '/TinyMCE',
+    name: 'TinyMCE',
+    component: () => import('../views/TinyMCE.vue'),
+    meta: {
+      name: 'TinyMCE',
+      title: '富文本TinyMCE'
+    }
+  },
+  {
+    path: '/ThreeJs_1',
+    name: 'ThreeJs_1',
+    component: () => import('../views/ThreeTest/OrbitControls.vue'),
+    meta: {
+      name: 'OrbitControls',
+      title: '轨道控制器-父子物体-缩放-旋转'
+    }
+  },
+  {
+    path: '/testMaterial',
+    name: 'testMaterial',
+    component: () => import('../views/ThreeTest/testMaterial.vue'),
+    meta: {
+      name: 'testMaterial',
+      title: 'Three材质'
+    }
+  },
+  {
+    path: '/TestThree',
+    name: 'TestThree',
+    component: () => import('../views/ThreeTest/TestThree.vue'),
+    meta: {
+      name: 'TestThree',
+      title: 'Three动态效果'
     }
   }
 ];
