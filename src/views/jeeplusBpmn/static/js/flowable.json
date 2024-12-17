@@ -1,0 +1,148 @@
+{
+    "name": "Flowable",
+    "uri": "http://flowable.org/bpmn",
+    "prefix": "flowable",
+    "xml": {
+      "tagAlias": "lowerCase"
+    },
+    "associations": [],
+    "types": [
+      {
+        "name": "CustomProperties",
+        "superClass": [
+          "Element"
+        ],
+        "meta": {
+          "allowedIn": [
+            "*"
+          ]
+        },
+        "properties": [
+           {
+            "name": "values",
+            "type": "CustomProperty",
+            "isMany": true
+          },
+          {
+            "name": "userIdList",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "userNameList",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "assigneeField",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "handlerStrategy",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "roleGroupCode",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "roleCode",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "findUserType",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "combineType",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "relationNodeId",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "actionList",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "taskType",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "nodeType",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "isSequential",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "proportion",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "expression",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "skipExpression",
+            "isAttr": true,
+            "type": "String"
+          },{
+            "name": "formName",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "selectFormKey",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "selectPath",
+            "isAttr": true,
+            "type": "String"
+          }
+          
+        ]
+      },
+      {
+        "name": "CustomProperty",
+        "superClass": [
+          "Element"
+        ],
+        "properties": [
+          {
+            "name": "id",
+            "type": "String",
+            "isAttr": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "isAttr": true
+          },
+          {
+            "name": "value",
+            "type": "String",
+            "isAttr": true
+          }
+        ]
+      }
+    ]
+}
+  

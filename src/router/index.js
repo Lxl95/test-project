@@ -241,6 +241,15 @@ const routes = [
       name: 'TestThree',
       title: 'Three动态效果'
     }
+  },
+  {
+    path: '/jeeplusBpmn',
+    name: 'jeeplusBpmn',
+    component: () => import('../views/jeeplusBpmn/Bpmn.vue'),
+    meta: {
+      name: 'jeeplusBpmn',
+      title: 'jeeplusBpmn'
+    }
   }
 ];
 

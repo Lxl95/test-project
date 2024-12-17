@@ -26,6 +26,7 @@
     "fake-progress": "^1.0.4",
     "html2pdf.js": "^0.10.2",
     "image-conversion": "^2.1.1",
+    "jeeplus-bpmn": "^6.0.9",
     "luckyexcel": "^1.0.1",
     "three": "^0.146.0",
     "v-viewer": "^1.6.4",
