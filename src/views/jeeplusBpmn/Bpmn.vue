@@ -1,36 +1,64 @@
 <template>
-  <div id="bpmn-container"></div>
+  <div>
+    <div class="headerBtn">
+      <el-button @click="handleSave" icon="el-icon-folder" size="mini" type="primary">保存</el-button>
+    </div>
+    <div id="bpmn-container"></div>
+  </div>
 </template>
 
 <script>
 import BpmnModeler from 'jeeplus-bpmn/lib/Modeler';
-import flowableModdle from './static/js/flowable.json';
-import './static/css/bpmn.css';
+// import flowableModdle from './static/js/flowable.json';
+import customTranslate from './static/js/customTranslate.js';
+import { templateXml } from './static/js/template.js';
+// import './static/css/bpmn.css';
+import 'bpmn-js/dist/assets/diagram-js.css' // 基础样式
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css' // 节点基础图标
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css' // 节点完整图标
+
 export default {
   data() {
     return {
-      bpmnModeler: null,
-      initXMLTemplate: `<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_0001" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="Process_1734404108890" name="业务流程_1734404108890" isExecutable="true"><bpmn:startEvent id="Event_0iufxx4" name="开始" /></bpmn:process><bpmndi:BPMNDiagram id="BPMNDiagram_1"><bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1734404108890"><bpmndi:BPMNShape id="Event_0iufxx4_di" bpmnElement="Event_0iufxx4"><dc:Bounds x="332" y="182" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="339" y="225" width="23" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNShape></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>` //my BPMN 2.0 xml
+      bpmnModeler: null
     };
   },
-  mounted () {
-      this.init()
+  mounted() {
+    this.init();
   },
   methods: {
     init() {
       this.bpmnModeler = new BpmnModeler({
         container: '#bpmn-container',
+        additionalModules: [
+          {
+            translate: ['value', customTranslate], //翻译
+            // labelEditingProvider: ['value', ''] // 禁用节点编辑
+          }
+        ],
         moddleExtensions: {
-            flowable: flowableModdle
+          // flowable: flowableModdle
         }
       });
+      var xml = templateXml;
+      const processId = new Date().getTime();
+      xml = xml.replace(/process_processId/g, 'process' + processId);
+      xml = xml.replace(/流程_processId/g, '流程' + processId);
 
-      this.bpmnModeler.importXML(this.initXMLTemplate, function (err) {
+      this.bpmnModeler.importXML(xml, function (err) {
         if (err) {
           console.log('error rendering', err);
         } else {
           console.log('rendered');
+        }
+      });
+    },
+    handleSave() {
+      this.bpmnModeler.saveXML({ format: true }, (err, xml) => {
+        if (err) {
+          this.$message.error(err);
+        } else {
+          console.log(xml);
         }
       });
     }
@@ -40,7 +68,10 @@ export default {
 
 <style>
 #bpmn-container {
-    height: 100vh;
-    background: url('./static/img/bpmnBg.svg');
+  height: 100vh;
+  background: url('./static/img/bpmnBg.svg');
+}
+.headerBtn {
+  padding: 10px;
 }
 </style>
