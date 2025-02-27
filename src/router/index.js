@@ -250,6 +250,15 @@ const routes = [
       name: 'jeeplusBpmn',
       title: 'jeeplusBpmn'
     }
+  },
+  {
+    path: '/transition',
+    name: '入场动画',
+    component: () => import('../views/VueTest/transition.vue'),
+    meta: {
+      name: 'transition',
+      title: '入场动画'
+    }
   }
 ];
 
