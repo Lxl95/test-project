@@ -32,6 +32,9 @@ Vue.use(ElementUI);
 import CodeView from 'vue-code-view';
 Vue.use(CodeView);
 
+import VueKonva from 'vue-konva';
+Vue.use(VueKonva);
+
 Vue.config.productionTip = false;
 
 new Vue({

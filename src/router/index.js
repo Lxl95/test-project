@@ -259,6 +259,42 @@ const routes = [
       name: 'transition',
       title: '入场动画'
     }
+  },
+  {
+    path: '/vueDiagramEditor',
+    name: 'vueDiagramEditor',
+    component: () => import('../views/vueDiagramEditor/vueDiagramEditor.vue'),
+    meta: {
+      name: 'vueDiagramEditor',
+      title: 'vueDiagramEditor'
+    }
+  },
+  {
+    path: '/goJsVue',
+    name: 'vueDiagramEditor',
+    component: () => import('../views/vueDiagramEditor/goJsVue.vue'),
+    meta: {
+      name: 'goJsVue',
+      title: 'goJsVue'
+    }
+  },
+  {
+    path: '/goJs',
+    name: 'vueDiagramEditor',
+    component: () => import('../views/vueDiagramEditor/goJs.vue'),
+    meta: {
+      name: 'goJs',
+      title: 'goJs'
+    }
+  },
+  {
+    path: '/konva',
+    name: 'vueDiagramEditor',
+    component: () => import('../views/vueDiagramEditor/konva.vue'),
+    meta: {
+      name: 'konva',
+      title: 'konva'
+    }
   }
 ];
 
