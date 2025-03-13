@@ -295,6 +295,15 @@ const routes = [
       name: 'konva',
       title: 'konva'
     }
+  },
+  {
+    path: '/wordCloud',
+    name: '词云图',
+    component: () => import('../views/Echarts/wordCloud.vue'),
+    meta: {
+      name: '词云图',
+      title: 'wordCloud'
+    }
   }
 ];
 
