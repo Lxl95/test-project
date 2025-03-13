@@ -1,5 +1,5 @@
 <template>
-  <g :id="node.id">
+  <g :id="node.id" class="node-box">
     <rect
       v-if="pulsable(node)"
       class="diagram--editor__pulse"
@@ -15,6 +15,7 @@
       :fill="color(node)"
       stroke="#000000"
       :stroke-width="selected ? 1 : 0"
+      :stroke-dasharray="selected ? '2 ,2' : 0"
       :x="node.x" :y="node.y"
       rx="3" ry="3"
       :width="node.width"
@@ -26,7 +27,7 @@
       :width="node.size.width - 4"
       :title="node.title"
       :dragging="dragging"
-      :deletable="nodeDeletable"
+      :readonly="readonly"
       @mousedown.native.stop="onDragStart"
       @delete="deleteNode"
     />
@@ -119,6 +120,7 @@ export default {
     hoveredPort: {type: Object, default: null},
     selected: {type: Boolean, default: false},
     dragging: {type: Boolean, default: false},
+    readonly: {type: Boolean, default: false},
   },
 
   data() {
@@ -166,7 +168,6 @@ export default {
       return this.node.size.width - 4;
     },
     slotHeight() {
-      // отступ - заготовок - отступ
       return this.node.size.height - 22;
     },
     nodeDeletable(){

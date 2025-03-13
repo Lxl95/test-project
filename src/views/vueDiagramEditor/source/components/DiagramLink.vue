@@ -1,6 +1,6 @@
 <template>
   <g
-    @mouseenter="hovered=true"
+    @mouseenter="hovered = true"
     @mouseleave="hovered=false"
     @mousedown="$emit('mousedown', $event)"
   >
@@ -16,6 +16,19 @@
       stroke-width="2"
       fill="none"
     />
+    <!-- 面板 -->
+      <foreignObject
+        v-if="hovered"
+        :x="contextMenuX"
+        :y="contextMenuY"
+        width="60px"
+        height="120px"
+      >
+        <div class="panel">
+          <el-button size="mini" type="danger" circle icon="el-icon-delete" @click="deletePath()" />
+          <!-- <i class="el-icon-delete" @click="deletePath()"></i> -->
+        </div>
+      </foreignObject>
   </g>
 </template>
 <script>
@@ -28,14 +41,17 @@ export default {
     link: {type: Link, required: true},
     nodeStart: {type: Node, required: true},
     nodeEnd: {type: Node, required: true},
-    selected: {type: Boolean, default: false}
+    selected: {type: Boolean, default: false},
+    contextMenuX: {type: Number, default: 0},
+    contextMenuY: {type: Number, default: 0},
   },
 
   data: () => ({
-    hovered: false
+    hovered: false,
   }),
 
   computed: {
+    
     startCoordinates() {
       return this.nodeStart.getPortCoordinates('out', this.link.start_port);
     },
@@ -75,5 +91,20 @@ export default {
       return this.hovered ? 'stroke:rgba(255,0,0,0.5);' : 'stroke:rgba(255,0,0,0.0);';
     }
   },
+  methods: {
+    deletePath() {
+      if (this.link && this.link.id) {
+          this.$emit('deletePath', this.link.id);
+        }
+    },
+    // 显示删除按钮
+    showPanel(event) {
+      console.log(event);
+      this.hovered = true;
+      this.contextMenuX = event.offsetX;
+      this.contextMenuY = event.offsetY;
+    },
+  }
+  
 };
 </script>

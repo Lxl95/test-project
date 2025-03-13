@@ -16,6 +16,7 @@
       :port-available="portAvailable"
       :pan="pan"
       :prevent-mouse-events-default="preventMouseEventsDefault"
+      :readonly="readonly"
       @select-node="$emit('select-node', $event)"
       @deleted-node="$emit('deleted-node', $event)"
       @deleted-link="$emit('deleted-link', $event)"
@@ -92,6 +93,10 @@ export default {
     preventMouseEventsDefault: {
       type: Boolean,
       default: true
+    },
+    readonly: {
+      type: Boolean,
+      default: false
     },
   },
 

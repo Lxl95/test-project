@@ -37,7 +37,11 @@
         :node-start="nodes[link.start_id]"
         :node-end="nodes[link.end_id]"
         :selected="selectedLink === link.id"
+        :contextMenuX="contextMenuX"
+        :contextMenuY="contextMenuY"
         @mousedown="selectLink(link.id)"
+        @mouseenter="showPanel"
+        @deletePath="deletePath(link.id)"
       />
       <DiagramNode
         v-for="node in nodes"
@@ -47,9 +51,10 @@
         :pulse-color="nodePulseColor"
         :pulsable="nodePulsable"
         :deletable="nodeDeletable"
+        :readonly="readonly"
         :dragging="draggedNode === node.id"
         :selected="selectedNode === node.id"
-        :port-disabled="portDisabled"
+        :port-disabled="readonly ? () => true : portDisabled"
         :port-available="portAvailable"
         :active-port="activePort"
         :hovered-port="hoveredPort"
@@ -107,6 +112,13 @@ export default {
     portAvailable: {type: Function, required: true},
     pan: {type: Boolean, required: true},
     preventMouseEventsDefault: {type: Boolean, default: true},
+    readonly: {type: Boolean, default: false},
+  },
+  data: () => {
+    return {
+      contextMenuX: 0,
+      contextMenuY: 0
+    }
   },
   computed: {
     uniqId() {
@@ -121,6 +133,17 @@ export default {
   },
 
   methods: {
+    deletePath(linkId) {
+      if(linkId) {
+        this.deleteLink(linkId);
+      }
+    },
+    // 获取删除按钮的坐标
+    showPanel(event) {
+      const {x, y} = this.convertXYtoViewPort(event.pageX, event.pageY);
+      this.contextMenuX = x;
+      this.contextMenuY = y;
+    },
     keyDownHandler(e) {
       // delete
       if (e.keyCode === 46) {

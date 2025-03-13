@@ -2,7 +2,7 @@
   <svg
     :x="x" :y="y"
     :width="width"
-    height="16"
+    height="60"
     :style="{cursor: dragging?'grabbing':'grab'}"
     @mouseenter="hover=true"
     @mouseleave="hover=false"
@@ -13,15 +13,26 @@
       x="0" y="0"
       rx="3" ry="3"
       :width="width"
-      height="16"
+      height="60"
     />
-    <svg x="0" y="0" :width="deletable ? width - 17 : width" height="16">
+    <svg x="0" y="0" :width="deletable ? width - 17 : width" height="60">
       <title>{{ title }}</title>
-      <text x="2" y="13" font-size="15" font-weight="normal" fill="#fff">{{ title }}</text>
+      <text x="2" y="13" font-size="16" font-weight="normal" fill="#fff">{{ title }}</text>
+      <!-- 标题 -->
+      <!-- <foreignObject
+        :x="2"
+        :y="2"
+        width="60px"
+        height="120px"
+      >
+        <div class="table-title">
+          {{ title }}
+        </div>
+      </foreignObject> -->
     </svg>
 
     <svg
-      v-if="deletable"
+      v-if="deletable && !readonly"
       :x="width - 15" y="1"
       width="14" height="14"
       class="diagram-editor__delete"
@@ -73,6 +84,10 @@ export default {
     dragging: {
       type: Boolean,
       default: false
+    },
+    readonly: {
+      type: Boolean,
+      default: false
     }
   },
   data: () => ({
@@ -80,7 +95,7 @@ export default {
   }),
   computed: {
     titleFillOpacity() {
-      return this.hover ? 0.7 : 0.5;
+      return this.hover ? 0.3 : 0.1;
     }
   },
 };

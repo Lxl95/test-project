@@ -2,17 +2,24 @@
   <div>
     <VueDiagramEditor
     ref="diagram"
+    :readonly="readonly"
     :node-color="nodeColor"
     :node-pulsable="nodePulsable"
     @select-node="selectNode"
     @created-link="createdLink"
+    @beforeDeleteNode="beforeDeleteNode"
+    @beforeDeleteLink="beforeDeleteLink"
+    @deleted-node="deleteNode"
+    @deleted-link="deleteLink"
+    @updated-node="updateNode"
   >
-    <!-- <pre slot="node" slot-scope="{node}">{{ format(node) }}</pre> -->
-    <pre slot="node" slot-scope="{}"></pre>
+    <pre slot="node" slot-scope="{node}">{{ format(node) }}</pre>
+    <!-- <pre slot="node" slot-scope="{}"></pre> -->
   </VueDiagramEditor>
   <el-button type="primary" @click="addTable">addTable</el-button>
   <el-button type="primary" @click="addLink">addLink</el-button>
   <el-button type="primary" @click="Save">Save</el-button>
+  <el-button type="primary" @click="Readonly">启用/禁用</el-button>
   <el-table :data="NodeListData" border style="width: 100%">
       <el-table-column prop="id" label="表Id" width=""/>
       <el-table-column prop="title" label="表名" width=""/>
@@ -29,16 +36,17 @@
 </template>
 
 <script>
-import VueDiagramEditor from 'vue-diagram-editor';
-import 'vue-diagram-editor/dist/vue-diagram-editor.css';
-// import VueDiagramEditor from './source/index.js';
-// import './source/style.scss';
+// import VueDiagramEditor from 'vue-diagram-editor';
+// import 'vue-diagram-editor/dist/vue-diagram-editor.css';
+import VueDiagramEditor from './source/index.js';
+import './source/style.scss';
 export default {
   name: 'simple-example',
   components: {
     VueDiagramEditor
   },
   data: () => ({
+    readonly: false,
     NodeListData: [],
     LinkListData: [],
     nodes: {
@@ -49,7 +57,7 @@ export default {
           width: 200,
           height: 220
         },
-        StringArray: [ 'kk', 'mm'],
+        data: {a:3,b:'lxl'} ,
         portsOut: {
           default: 'id',
           title: 'my-title',
@@ -119,23 +127,34 @@ export default {
       return JSON.stringify(node, null, 2);
     },
     nodeColor(node) {
-      if (node.coordinates.x > 200) {
-        return '#0f0';
-      }
-      if (node.coordinates.y > 200) {
-        return '#f00';
-      }
+      // if (node.coordinates.x > 200) {
+      //   return '#0f0';
+      // }
+      // if (node.coordinates.y > 200) {
+      //   return '#f00';
+      // }
 
-      return '#00f';
+      return '#66b1ff';
     },
 
     nodePulsable(node) {
       return node.coordinates.y > 200;
     },
+    Readonly() {
+      this.readonly = !this.readonly
+    },
     createdLink(link){
       console.log(link);
+      this.Save()
+
     },
     selectNode(node){
+      console.log(node);
+    },
+    beforeDeleteNode(node){
+      console.log(node);
+    },
+    beforeDeleteLink(node){
       console.log(node);
     },
     addTable() {
@@ -165,6 +184,8 @@ export default {
           school: 'my-school',
         }
       });
+      this.Save()
+
     },
     addLink() {
       this.$refs.diagram.addLink({
@@ -174,6 +195,16 @@ export default {
         end_id: 'node-2',
         end_port: 'age'
       });
+      this.Save()
+    },
+    deleteNode() {
+      this.Save()
+    },
+    deleteLink() {
+      this.Save()
+    },
+    updateNode() {
+      this.Save()
     },
     Save() {
       console.log(this.$refs.diagram);
