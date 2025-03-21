@@ -22,11 +22,13 @@ export default {
       const myChart = echarts.init(echartDom);
       var maskImage = new Image();
       maskImage.src = this.image;
+
+      const color = ['#009DFF', '#22E4FF', '#3BFFD0', '#04E38A', '#FEE588', '#5B6E96', '#E65A56'];
       const option = {
         series: [
           {
             type: 'wordCloud',
-            shape: 'circle',// 默认形状（会被 maskImage 覆盖）
+            shape: 'circle', // 默认形状（会被 maskImage 覆盖）
             keepAspect: false,
             // maskImage: maskImage, // 自定义形状图片
             left: 'center',
@@ -36,16 +38,24 @@ export default {
             right: null,
             bottom: null,
             sizeRange: [12, 60], // 字体大小范围
-            rotationRange: [-90, 90], // 旋转角度范围
+            rotationRange: [0, 0], // 旋转角度范围
             rotationStep: 45, // 旋转步长
             gridSize: 8, // 网格大小
             drawOutOfBound: false, // 是否允许词语超出画布
             layoutAnimation: true,
             textStyle: {
-              fontFamily: 'sans-serif',
-              fontWeight: 'bold',
-              color: function () {
-                return 'rgb(' + [Math.round(Math.random() * 160), Math.round(Math.random() * 160), Math.round(Math.random() * 160)].join(',') + ')';
+              normal: {
+                fontFamily: 'sans-serif',
+                fontWeight: 'bold',
+                // color: function () {
+                //   return 'rgb(' + [Math.round(Math.random() * 160), Math.round(Math.random() * 160), Math.round(Math.random() * 160)].join(',') + ')';
+                // }
+                color: function (v){
+                  //  return `${color[v.dataIndex % 7]}`
+                  let colors = ['#2ceded', '#f6b768', '#ff714a', '#e70e65', '#b347ff', '#7049f0']
+                  let i = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+                  return colors[i]
+                }
               }
             },
             emphasis: {
