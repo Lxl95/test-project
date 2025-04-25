@@ -1,65 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Export Excel to Base64</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-</head>
-<body>
-  <h1>Export Excel to Base64</h1>
-  <button id="exportBtn">Export Excel</button>
-  <p id="base64Output"></p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Export Excel to Base64</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <h1>Export Excel to Base64</h1>
+    <button id="exportBtn">Export Excel</button>
+    <button id="exportBtn2">Export Excel，限制列类型</button>
+    <p id="base64Output"></p>
 
-  <script>
-    // 示例数据
-    const data = [
-      { name: '张三', age: 30, city: '北京' },
-      { name: '李四', age: 25, city: '上海' },
-      { name: '王五', age: 28, city: '广州' },
-    ];
-  
-    // 导出 Excel 并转换为 Base64
-    function exportToExcelAndBase64() {
-      // 创建工作簿和工作表
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-  
-      // 生成 Excel 文件的二进制数据
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  
-      // 将二进制数据转换为 Base64
-      const base64 = arrayBufferToBase64(excelBuffer);
-      console.log('Base64:', 'data:xlsx;base64,' + base64);
-  
-      // 显示 Base64 数据
-      document.getElementById('base64Output').innerText = `Base64: ${base64}`;
-  
-      // 导出为文件（可选）
-      // const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-      // const url = URL.createObjectURL(blob);
-      // const a = document.createElement('a');
-      // a.href = url;
-      const a = document.createElement('a');
-      a.href = 'data:xlsx;base64,' + base64;
-      a.download = 'example.xlsx';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  
-    // 将 ArrayBuffer 转换为 Base64
-    function arrayBufferToBase64(buffer) {
-      let binary = '';
-      const bytes = new Uint8Array(buffer);
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
+    <script>
+      // 数据
+      const data = [
+        { name: 'John', age: 30, date: '2023-10-01' },
+        { name: '78', age: '12', date: '2023/10/03' },
+        { name: 'Jane', age: 25, date: '2023-10-02' }
+      ];
+      function exportToExcel_ColumnType() {
+
+        // 将数据转为工作表
+        const worksheet = XLSX.utils.json_to_sheet(data);
+
+        // 设置列类型
+        const columnTypes = {
+          name: '@',      // 文本类型
+          age: '0',       // 数字类型
+          date: 'yyyy-mm-dd' // 日期类型
+        };
+        const range = XLSX.utils.decode_range(worksheet['!ref']); // 获取工作表范围
+
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const headerCell = XLSX.utils.encode_cell({ r: 0, c: col });
+          const headerValue = worksheet[headerCell].v;
+
+          // 根据配置设置列类型
+          if (columnTypes[headerValue]) {
+            worksheet[headerCell].z = columnTypes[headerValue];
+          }
+        }
+
+        // 创建工作簿并导出
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+        XLSX.writeFile(workbook, 'export.xlsx');
       }
-      return window.btoa(binary);
-    }
-  
-    // 绑定按钮点击事件
-    document.getElementById('exportBtn').addEventListener('click', exportToExcelAndBase64);
-  </script>
-</body>
+
+      // 导出 Excel 并转换为 Base64
+      function exportToExcelAndBase64() {
+        // 创建工作簿和工作表
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+        // 生成 Excel 文件的二进制数据
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+        // 将二进制数据转换为 Base64
+        const base64 = arrayBufferToBase64(excelBuffer);
+        console.log('Base64:', 'data:xlsx;base64,' + base64);
+
+        // 显示 Base64 数据
+        document.getElementById('base64Output').innerText = `Base64: ${base64}`;
+
+        // 导出为文件（可选）
+        // const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        // const url = URL.createObjectURL(blob);
+        // const a = document.createElement('a');
+        // a.href = url;
+        const a = document.createElement('a');
+        a.href = 'data:xlsx;base64,' + base64;
+        a.download = 'example.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // 将 ArrayBuffer 转换为 Base64
+      function arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+      }
+
+      // 绑定按钮点击事件
+      document.getElementById('exportBtn').addEventListener('click', exportToExcelAndBase64);
+      document.getElementById('exportBtn2').addEventListener('click', exportToExcel_ColumnType);
+    </script>
+  </body>
 </html>

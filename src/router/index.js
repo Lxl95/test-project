@@ -280,7 +280,7 @@ const routes = [
   },
   {
     path: '/goJs',
-    name: 'vueDiagramEditor',
+    name: 'goJs',
     component: () => import('../views/vueDiagramEditor/goJs.vue'),
     meta: {
       name: 'goJs',
@@ -289,7 +289,7 @@ const routes = [
   },
   {
     path: '/konva',
-    name: 'vueDiagramEditor',
+    name: 'goJs',
     component: () => import('../views/vueDiagramEditor/konva.vue'),
     meta: {
       name: 'konva',
@@ -298,11 +298,29 @@ const routes = [
   },
   {
     path: '/wordCloud',
-    name: '词云图',
+    name: 'wordCloud',
     component: () => import('../views/Echarts/wordCloud.vue'),
     meta: {
-      name: '词云图',
-      title: 'wordCloud'
+      name: 'wordCloud',
+      title: '词云图'
+    }
+  },
+  {
+    path: '/exportExcel',
+    name: 'exportExcel',
+    component: () => import('../views/VueTest/exportExcel.vue'),
+    meta: {
+      name: 'exportExcel',
+      title: 'excel单元格格式'
+    }
+  },
+  {
+    path: '/popupSearch',
+    name: 'popupSearch',
+    component: () => import('../views/VueTest/popupSearch.vue'),
+    meta: {
+      name: 'popupSearch',
+      title: '拖拽伸缩搜索'
     }
   }
 ];
