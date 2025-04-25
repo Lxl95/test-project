@@ -27,27 +27,27 @@
 export default {
   name: 'popupSearch',
   directive: {
-    draggabled: {
-      bind(el, binding, vnode) {
-        el.style.position = 'absolute';
-        const that = vnode.context
-        el.onmousedown = function (e) {
-          const disX = e.clientX - el.offsetLeft;
-          const disY = e.clientY - el.offsetTop;
-          console.log(e.target.className);
-          document.onmousemove = function (e) {
-            const left = e.clientX - disX;
-            const top = e.clientY - disY;
-            el.style.left = left + 'px';
-            el.style.top = top + 'px';
-          };
-          document.onmouseup = function () {
-            document.onmousemove = null;
-            document.onmouseup = null;
-          };
-        };
-      }
-    }
+    // draggabled: {
+    //   bind(el, binding, vnode) {
+    //     el.style.position = 'absolute';
+    //     const that = vnode.context
+    //     el.onmousedown = function (e) {
+    //       const disX = e.clientX - el.offsetLeft;
+    //       const disY = e.clientY - el.offsetTop;
+    //       console.log(e.target.className);
+    //       document.onmousemove = function (e) {
+    //         const left = e.clientX - disX;
+    //         const top = e.clientY - disY;
+    //         el.style.left = left + 'px';
+    //         el.style.top = top + 'px';
+    //       };
+    //       document.onmouseup = function () {
+    //         document.onmousemove = null;
+    //         document.onmouseup = null;
+    //       };
+    //     };
+    //   }
+    // }
   }
 };
 </script>
@@ -110,6 +110,10 @@ export default {
   pointer-events: none;
   display: inline-block;
   transition: background-color 0.2s ease-in-out;
+}
+.search__icon .feather-search {
+    /* svg不触发鼠标事件 */
+    pointer-events: none; 
 }
 .search__field::-webkit-input-placeholder {
   position: relative;

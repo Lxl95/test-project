@@ -35,6 +35,28 @@ Vue.use(CodeView);
 import VueKonva from 'vue-konva';
 Vue.use(VueKonva);
 
+Vue.directive('draggabled', {
+  bind(el, binding, vnode) {
+    el.style.position = 'absolute';
+    const that = vnode.context
+    el.onmousedown = function (e) {
+      const disX = e.clientX - el.offsetLeft;
+      const disY = e.clientY - el.offsetTop;
+      console.log(e.target.className);
+      document.onmousemove = function (e) {
+        const left = e.clientX - disX;
+        const top = e.clientY - disY;
+        el.style.left = left + 'px';
+        el.style.top = top + 'px';
+      };
+      document.onmouseup = function () {
+        document.onmousemove = null;
+        document.onmouseup = null;
+      };
+    };
+  }
+  });
+
 Vue.config.productionTip = false;
 
 new Vue({
