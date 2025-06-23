@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <link rel="stylesheet" href="./form-making/FormMaking.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 需要设置设计器高度 -->
+    <fm-making-form style="height: 500px;" preview generate-code generate-json>
+    </fm-making-form>
+  </div>
+</body>
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="./form-making/FormMaking.umd.js"></script>
+  
+  <script>
+    new Vue({
+      el: '#app'
+    })
+  </script>
+</html>

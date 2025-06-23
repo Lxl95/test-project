@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title></title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover" />
+    <script>
+      !(function (e) {
+        try {
+        } catch (e) {}
+      })(window),
+        (function (e) {
+          var t = new Image();
+          t.addEventListener('load', () => {
+            1 === t.width && (e.__SUPPORT_WEBP__ = !0);
+          }),
+            (t.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=');
+        })(window),
+        (function () {
+          function e() {
+            WeixinJSBridge.invoke('setFontSizeCallback', { fontSize: 0 }),
+              WeixinJSBridge.on('menu:setfont', function () {
+                WeixinJSBridge.invoke('setFontSizeCallback', { fontSize: 0 });
+              });
+          }
+          'object' == typeof WeixinJSBridge && 'function' == typeof WeixinJSBridge.invoke
+            ? e()
+            : document.addEventListener
+            ? document.addEventListener('WeixinJSBridgeReady', e, !1)
+            : document.attachEvent && (document.attachEvent('WeixinJSBridgeReady', e), document.attachEvent('onWeixinJSBridgeReady', e));
+        })(),
+        (function (e) {
+          e.INVITATION_CARD = {};
+        })(window),
+        (function (e, t) {
+          var n = t.documentElement,
+            o = e.devicePixelRatio || 1;
+          function i() {
+            var t = 2 * Math.min(80, n.clientWidth / 10);
+            (t = Math.max(75, t)), 0 === e.location.hash.indexOf('#/poster') && (t = n.clientWidth / 5), (n.style.fontSize = t + 'px');
+          }
+          if (
+            ((function e() {
+              t.body ? t.body.offsetWidth < 375 && (n.style.height = '100vh') : t.addEventListener('DOMContentLoaded', e);
+            })(),
+            i(),
+            e.addEventListener('resize', i),
+            e.addEventListener('pageshow', function (e) {
+              e.persisted && i();
+            }),
+            o >= 2)
+          ) {
+            var a = t.createElement('body'),
+              r = t.createElement('div');
+            (r.style.border = '.5px solid transparent'), a.appendChild(r), n.appendChild(a), 1 === r.offsetHeight && n.classList.add('hairlines'), n.removeChild(a);
+          }
+        })(window, document),
+        (function (e, t) {
+          function n(e) {
+            for (var n = e + '=', o = t.cookie.split(';'), i = 0; i < o.length; i++) {
+              var a = o[i].trim();
+              if (0 == a.indexOf(n)) return a.substring(n.length, a.length);
+            }
+            return '';
+          }
+          function o(e) {
+            const t = e.indexOf('?');
+            return t > -1 ? e.substring(t + 1).split('&') : [];
+          }
+          function i(e) {
+            const t = {};
+            return (
+              e.forEach(function (e) {
+                const [n, o] = e.split('=');
+                t[n] = o;
+              }),
+              t
+            );
+          }
+          function a(t, n) {
+            const { getHashWhenNoSearch: a = !0, shouldDecode: r = !0 } = n || {};
+            let { hash: c, search: d } = e.location;
+            (c = r ? decodeURIComponent(c) : c), (d = r ? decodeURIComponent(d) : d);
+            let l = {};
+            const s = i(o(d));
+            if ((a && (l = i(o(c))), t)) {
+              const e = s[t];
+              return a ? e || l[t] : e;
+            }
+            return a ? Object.assign(s, l) : s;
+          }
+          function r() {
+            let t = '';
+            const n = e.location.host || location.host;
+            return /www7\./.test(n) && (t = 'pre-'), /dev\./.test(n) && (t = 'dev-'), t;
+          }
+          function c(t) {
+            return t.test(e.navigator.userAgent);
+          }
+          function d() {
+            var e = t.getElementById('hlj-wx-loading');
+            e && e.parentNode && e.parentNode.removeChild && e.parentNode.removeChild(e);
+            var n = t.getElementById('hlj-loading');
+            n && n.style && ((n.style.visibility = 'visible'), a('puppeteer') && (n.style.display = 'none'));
+          }
+          var l = n('card_openid_key') || 'pay_wx_openid_20190805';
+          function s(t) {
+            const { href: n } = e.location;
+            let o = `https://${r()}api.hunliji.com/hms/wechat/appApi/v2/auth/url?redirectUrl=` + encodeURIComponent(n + (t ? '&alreadyGotUserInfo=1' : '')) + '&accountType=INVITATION_GIFT_SERVICE';
+            t && (o += '&authType=SNSAPI_USERINFO'), (e.location.href = o);
+          }
+          function h() {
+            try {
+              c(/MicroMessenger/i) && !c(/wxwork/i) && !a('is_no_need_open_id') && '1' !== a('preview') && a('cardId')
+                ? fetch('//api.hunliji.com/hms/eInvitation/appApi/card/openid/key/info')
+                    .then(e => e.json())
+                    .then(o => {
+                      const { openidKey: i, useOpenidKey: a } = o.data;
+                      console.log('微信授权数据ya', o),
+                        1 === Number(a) && l !== i
+                          ? (!(function (e, n, o) {
+                              var i = new Date();
+                              i.setTime(i.getTime() + 24 * o * 60 * 60 * 1e3);
+                              var a = 'expires=' + i.toGMTString();
+                              t.cookie = e + '=' + n + '; domain=.hunliji.com;' + a;
+                            })('card_openid_key', i),
+                            console.log('第0遍授权'),
+                            s())
+                          : n('INVITATION_GIFT_SERVICE_openid')
+                          ? n('INVITATION_GIFT_SERVICE_openid') && !n('WX_UNIONID') && e.location.href.indexOf('alreadyGotUserInfo') < 0 && !c(/miniProgram/i)
+                            ? console.log('第二遍授权 1.1')
+                            : (console.log('已完成授权'), d())
+                          : (console.log('第一遍授权'), s());
+                    })
+                    .catch(() => {
+                      d();
+                    })
+                : d();
+            } catch (e) {
+              d(), console.log(e);
+            }
+          }
+          t.addEventListener('DOMContentLoaded', function () {
+            h();
+          });
+          const p = t => {
+            if (!t || -1 === t.indexOf('qnm.hunliji.com')) return t;
+            if (e.__SUPPORT_WEBP__ && t && t.indexOf('qnm.hunliji.com') > -1) {
+              let e = t,
+                n = t.indexOf('?') > -1,
+                o = t.indexOf('imageMogr2') > -1,
+                i = t.indexOf('imageView2') > -1,
+                a = t.indexOf('/format') > -1,
+                r = t.indexOf('/w') > -1;
+              return (e = `${e}${i ? '' : (n && o ? '|' : '?') + 'imageView2/2'}`), (e = `${e}${a ? '' : '/format/webp'}`), (e = `${e}${r ? '' : '/w/1284'}`), e;
+            }
+            {
+              const n = /\/format\/webp/;
+              return !e.__SUPPORT_WEBP__ && t && n.test(t) ? t.replace(n, '') : t;
+            }
+          };
+          let u = 0,
+            m = 0;
+          const f = () => {
+              m === u && v('cdnPreloadEnd');
+            },
+            g = t => {
+              const n = [];
+              return (
+                t.elements.forEach(t => {
+                  var o;
+                  if ((o = t) && o.element && o.element.position && o.element.position.top < 1.5 * e.innerHeight)
+                    switch (t.type) {
+                      case 'background':
+                        t && t.element && t.element.background && t.element.background.clipURL && n.push(p(t.element.background.clipURL || ''));
+                        break;
+                      case 'image':
+                        t && t.element && t.element.view && t.element.view.clipURL && n.push(p(t.element.view.clipURL || ''));
+                        break;
+                      case 'shape':
+                      case 'sticker':
+                        t && t.element && t.element.view && t.element.view.clipURL && n.push(t.element.view.clipURL || '');
+                    }
+                }),
+                n
+              );
+            },
+            v = (t, n, o) => {
+              e.__ANALYSE_DATA__.push({ key: t, value: n || new Date().getTime(), isCustomValue: o || !1 });
+            },
+            w = () => {
+              const e = localStorage.getItem(`hlj-${_}-preview`);
+              if (!('cdn' === e || 'error' === e)) return;
+              const t = localStorage.getItem('hlj-wedding-card-pages');
+              if (t)
+                try {
+                  v('cdnPreloadStart');
+                  const e = JSON.parse(t).pages[0];
+                  e.elements = JSON.parse(e.pageContent).elements;
+                  const n = g(e);
+                  (u = n.length || 1e4),
+                    n.forEach(e =>
+                      (e => {
+                        setTimeout(() => {
+                          const t = new Image();
+                          (t.src = e),
+                            (t.onload = () => {
+                              m++, f();
+                            });
+                        });
+                      })(e)
+                    );
+                } catch (e) {}
+            },
+            _ = a('cardId');
+          if ((localStorage.removeItem(`hlj-${_}-preview`), localStorage.removeItem('hlj-wedding-card-pages'), _)) {
+            e.__ANALYSE_DATA__ = [];
+            const t = [!1, !1],
+              n = { cdn: 1, delete: 2, black: 3, error: 4, api: 5 },
+              o = () => {
+                t[0] && t[1] && v('cdnFetchEnd');
+              };
+            v('cdnFetchStart'),
+              fetch('https://' + r() + 'api.hunliji.com/hms/eInvitation/appApi/card/v2/previewRoute?cardId=' + _)
+                .then(e => e.json())
+                .then(e => {
+                  e && e.data && e.data.route
+                    ? (localStorage.setItem(`hlj-${_}-preview`, e.data.route), v('cdnPreviewRoute', n[e.data.route], !0), v('apiPreviewRouteEnd'), (t[0] = !0), o(), w())
+                    : (localStorage.setItem(`hlj-${_}-preview`, 'error'), v('cdnPreviewRoute', n.error, !0), w());
+                })
+                .catch(() => {
+                  localStorage.setItem(`hlj-${_}-preview`, 'error'), v('cdnPreviewRoute', n.error, !0);
+                }),
+              fetch(
+                '//card.hunliji.com/' +
+                  (function () {
+                    let t = 'pro-';
+                    const n = e.location.host || location.host;
+                    return /dev\./.test(n) && (t = 'test-'), t;
+                  })() +
+                  'preview-' +
+                  _
+              )
+                .then(e => e.text())
+                .then(e => {
+                  e && (localStorage.setItem('hlj-wedding-card-pages', e), v('apiCdnEnd'), (t[1] = !0), o(), w());
+                });
+          }
+        })(window, document),
+        /weddingMerchant/i.test(window.navigator.userAgent) && document.documentElement.setAttribute('class', 'merchant');
+    </script>
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_641156_1mkebuj10yz.css" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_2678660_n7339ws632.css" />
+    <link rel="stylesheet" href="//qnc.hunliji.com/animate3.7.0.css" />
+    <link rel="stylesheet" href="//qnc.hunliji.com/app-preview-wedding-card/public/preload/preload-1.0.0.css" />
+    <style>
+      html.merchant {
+        --primary-color: #1478fa;
+      }
+
+      html {
+        --primary-color: #ff264a;
+      }
+
+      #hlj-loading {
+        background: #f2f3f6;
+      }
+
+      #hlj-loading__progress {
+        background-color: var(--primary-color, '#ff264a');
+      }
+
+      #hlj-loading__text {
+        color: var(--primary-color, '#ff264a');
+      }
+
+      #hlj-loading__wrap {
+        background-color: #e7e7e7;
+      }
+
+      #hlj-loading img {
+        height: 1.12rem;
+        width: 1.12rem;
+      }
+
+      .hlj-loading__done {
+        animation: loadingFadeOut 0.3s forwards;
+      }
+    </style>
+    <script type="text/javascript" src="//qnm.hunliji.com/o_1ibqv452bat37781e3m91dgtp9.js"></script>
+    <link href="//qnc.hunliji.com/app-preview-wedding-card/css/style.60b0b716.css" rel="stylesheet" />
+    <link href="//qnc.hunliji.com/app-preview-wedding-card/css/style.789010be.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <div id="hlj-loading">
+      <img src="https://qnm.hunliji.com/o_1fsino5du14q73jg1uf91vei1bo49.gif" />
+      <div id="hlj-loading__wrap"><span id="hlj-loading__progress"></span></div>
+      <div id="hlj-loading__text">0%</div>
+    </div>
+    <div id="hlj-wx-loading">加载中...</div>
+    <script defer="defer" src="//qnc.hunliji.com/app-preview-wedding-card/js/runtime-main.0f18a684.js"></script>
+    <script defer="defer" src="//qnc.hunliji.com/app-preview-wedding-card/js/157.1a69ffa0.js"></script>
+    <script defer="defer" src="//qnc.hunliji.com/app-preview-wedding-card/js/main.b836fcd7.js"></script>
+  </body>
+</html>
