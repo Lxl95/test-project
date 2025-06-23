@@ -53,8 +53,17 @@ export default {
                 color: function (v){
                   //  return `${color[v.dataIndex % 7]}`
                   let colors = ['#2ceded', '#f6b768', '#ff714a', '#e70e65', '#b347ff', '#7049f0']
-                  let i = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
-                  return colors[i]
+                  // let i = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+                  
+                  if(v.value == 900) {
+                    return '#ccc'
+                  } else if(v.value == 606) {
+                    return '#aaa'
+                  } else {
+                    let i = v.dataIndex%7;
+                    return colors[i]
+                  }
+                  
                 }
               }
             },

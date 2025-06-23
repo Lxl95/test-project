@@ -306,6 +306,15 @@ const routes = [
     }
   },
   {
+    path: '/echarts',
+    name: 'echarts',
+    component: () => import('../views/Echarts/echarts.vue'),
+    meta: {
+      name: 'echarts',
+      title: 'echarts'
+    }
+  },
+  {
     path: '/exportExcel',
     name: 'exportExcel',
     component: () => import('../views/VueTest/exportExcel.vue'),
@@ -321,6 +330,15 @@ const routes = [
     meta: {
       name: 'popupSearch',
       title: '拖拽伸缩搜索'
+    }
+  },
+  {
+    path: '/autocomplete',
+    name: 'autocomplete',
+    component: () => import('../views/elementUI/autocomplete.vue'),
+    meta: {
+      name: 'autocomplete',
+      title: '带建议的输入框'
     }
   }
 ];
