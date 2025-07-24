@@ -340,6 +340,33 @@ const routes = [
       name: 'autocomplete',
       title: '带建议的输入框'
     }
+  },
+  {
+    path: '/gtt',
+    name: 'gtt',
+    component: () => import('../views/甘特图/gtt.vue'),
+    meta: {
+      name: 'gtt',
+      title: '甘特图'
+    }
+  },
+  {
+    path: '/history',
+    name: 'history',
+    component: () => import('../views/表单设计器组件/history.vue'),
+    meta: {
+      name: 'history',
+      title: '审批历史'
+    }
+  },
+  {
+    path: '/drag',
+    name: 'drag',
+    component: () => import('../views/表单设计器组件/drag.vue'),
+    meta: {
+      name: 'drag',
+      title: '容器'
+    }
   }
 ];
 

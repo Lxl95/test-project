@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>双向拖拽选项卡容器 - Vue2 + Element UI</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/Vue.Draggable/2.24.3/vuedraggable.umd.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a237e, #4a148c, #880e4f);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+    }
+    
+    .header h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .app-container {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 900px) {
+      .app-container {
+        flex-direction: column;
+      }
+    }
+    
+    .components-panel {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.93);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transition: all 0.4s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .components-panel:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .panel-header h2 {
+      color: #5e35b1;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .panel-header h2 i {
+      font-size: 1.5rem;
+      color: #7e57c2;
+    }
+    
+    .draggable-component {
+      background: white;
+      border: 1px dashed #5e35b1;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 12px 0;
+      cursor: move;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .draggable-component:hover {
+      background: #f3e5f5;
+      border-style: solid;
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .draggable-component:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #7e57c2;
+    }
+    
+    .drag-icon {
+      margin-right: 15px;
+      color: #7e57c2;
+      font-size: 20px;
+      background: #ede7f6;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .component-info {
+      flex: 1;
+    }
+    
+    .component-info h3 {
+      color: #4527a0;
+      margin-bottom: 5px;
+    }
+    
+    .component-info p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .tabs-container {
+      flex: 2;
+      background: rgba(255, 255, 255, 0.93);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      min-height: 600px;
+      transition: all 0.4s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .tabs-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+    }
+    
+    .tabs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .tabs-header h2 {
+      color: #5e35b1;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .tabs-header h2 i {
+      font-size: 1.5rem;
+      color: #7e57c2;
+    }
+    
+    .tab-content {
+      padding: 20px;
+      background: white;
+      border-radius: 0 0 10px 10px;
+      min-height: 450px;
+      border: 1px solid #ebeef5;
+      border-top: none;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
+    }
+    
+    .draggable-item {
+      background: #f5f7fa;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      padding: 18px;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .draggable-item:hover {
+      background: #edf2f7;
+      border-color: #a78bfa;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .draggable-item .drag-icon {
+      background: #e0e7ff;
+      color: #6366f1;
+    }
+    
+    .item-content {
+      flex: 1;
+    }
+    
+    .item-content h3 {
+      color: #4f46e5;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+    
+    .draggable-item .delete-btn {
+      margin-left: 15px;
+      color: #ef4444;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: all 0.2s;
+      background: #fee2e2;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .draggable-item .delete-btn:hover {
+      opacity: 1;
+      transform: scale(1.1);
+      background: #fecaca;
+    }
+    
+    .instructions {
+      background: rgba(255, 255, 255, 0.93);
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .instructions h2 {
+      color: #5e35b1;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .instructions h2 i {
+      color: #7e57c2;
+    }
+    
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .step {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      border-left: 5px solid #7e57c2;
+      transition: all 0.3s;
+    }
+    
+    .step:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    .step h3 {
+      color: #5e35b1;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .step h3 i {
+      color: #7e57c2;
+      font-size: 1.3rem;
+    }
+    
+    .step p {
+      color: #555;
+      line-height: 1.6;
+    }
+    
+    .ghost {
+      opacity: 0.6;
+      background: #dbeafe;
+      border: 2px dashed #3b82f6;
+      transform: scale(1.02);
+    }
+    
+    .drag-handle {
+      cursor: move;
+    }
+    
+    .empty-tab {
+      text-align: center;
+      padding: 50px 20px;
+      color: #777;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 2px dashed #d1d5db;
+      margin-top: 20px;
+    }
+    
+    .empty-tab i {
+      font-size: 56px;
+      margin-bottom: 20px;
+      display: block;
+      color: #c7d2fe;
+    }
+    
+    .empty-tab h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #4f46e5;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: white;
+      padding: 20px;
+      opacity: 0.9;
+      font-size: 1.1rem;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stat-card {
+      background: #eef2ff;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      margin: 10px 0;
+      border: 1px solid #c7d2fe;
+    }
+    
+    .stat-card h4 {
+      color: #4f46e5;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+    }
+    
+    .stat-card p {
+      color: #6366f1;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    
+    .tab-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .component-counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #7e57c2;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <div class="header">
+        <h1>双向拖拽选项卡容器</h1>
+        <p>Vue2 + Element UI + vuedraggable 实现 - 支持在左侧面板、选项卡容器和不同选项卡之间自由拖拽组件</p>
+      </div>
+      
+      <div class="app-container">
+        <div class="components-panel">
+          <div class="panel-header">
+            <h2><i class="el-icon-menu"></i> 可拖拽组件库</h2>
+            <div class="stat-card">
+              <h4>组件总数</h4>
+              <p>{{ components.length }}</p>
+            </div>
+          </div>
+          
+          <draggable 
+            :list="components" 
+            :group="{ name: 'components', pull: 'clone', put: true }"
+            :sort="false"
+            ghost-class="ghost"
+            @add="onComponentAdd"
+          >
+            <div v-for="(comp, index) in components" :key="'comp-'+index" class="draggable-component">
+              <i class="el-icon-rank drag-handle drag-icon"></i>
+              <div class="component-info">
+                <h3>{{ comp.title }}</h3>
+                <p>{{ comp.description }}</p>
+              </div>
+            </div>
+          </draggable>
+          
+          <div class="stat-card">
+            <h4>已使用组件</h4>
+            <p>{{ usedComponentsCount }}</p>
+          </div>
+        </div>
+        
+        <div class="tabs-container">
+          <div class="tabs-header">
+            <h2><i class="el-icon-folder"></i> 选项卡容器</h2>
+            <div class="stat-card">
+              <h4>总选项卡</h4>
+              <p>{{ tabs.length }}</p>
+            </div>
+          </div>
+          
+          <el-tabs v-model="activeTab" type="card" @tab-remove="removeTab" editable>
+            <el-tab-pane
+              v-for="(tab, index) in tabs"
+              :key="index"
+              :label="tabLabel(tab)"
+              :name="tab.name"
+              :closable="tab.closable"
+            >
+              <draggable
+                :list="tab.items"
+                group="components"
+                ghost-class="ghost"
+                :animation="250"
+                @add="onAdd($event, tab)"
+                @remove="onRemove($event, tab)"
+              >
+                <transition-group name="list" tag="div" class="tab-content">
+                  <div v-for="(item, itemIndex) in tab.items" :key="item.id" class="draggable-item">
+                    <i class="el-icon-rank drag-handle drag-icon"></i>
+                    <div class="item-content">
+                      <h3>{{ item.title }}</h3>
+                      <el-input
+                        v-if="item.type === 'text'"
+                        v-model="item.value"
+                        :placeholder="item.placeholder"
+                        clearable
+                      ></el-input>
+                      <el-input
+                        v-if="item.type === 'password'"
+                        v-model="item.value"
+                        :placeholder="item.placeholder"
+                        show-password
+                      ></el-input>
+                      <el-input
+                        v-if="item.type === 'textarea'"
+                        v-model="item.value"
+                        type="textarea"
+                        :rows="3"
+                        :placeholder="item.placeholder"
+                      ></el-input>
+                      <el-input
+                        v-if="item.type === 'number'"
+                        v-model.number="item.value"
+                        type="number"
+                        :placeholder="item.placeholder"
+                      ></el-input>
+                      <el-date-picker
+                        v-if="item.type === 'date'"
+                        v-model="item.value"
+                        type="date"
+                        placeholder="选择日期"
+                        style="width: 100%;"
+                      ></el-date-picker>
+                    </div>
+                    <i class="el-icon-delete delete-btn" @click="removeItem(tab, itemIndex)"></i>
+                  </div>
+                  
+                  <div v-if="tab.items.length === 0" class="empty-tab">
+                    <i class="el-icon-upload"></i>
+                    <h3>拖拽组件到此处</h3>
+                    <p>从左侧面板拖拽组件到该区域，或从其他选项卡拖入组件</p>
+                  </div>
+                </transition-group>
+              </draggable>
+            </el-tab-pane>
+          </el-tabs>
+          
+          <div class="tab-actions">
+            <el-button 
+              type="primary" 
+              icon="el-icon-plus" 
+              @click="addTab"
+              style="flex: 1;"
+            >
+              添加新选项卡
+            </el-button>
+            <el-button 
+              type="success" 
+              icon="el-icon-download" 
+              @click="exportConfig"
+              style="flex: 1;"
+            >
+              导出配置
+            </el-button>
+            <el-button 
+              type="info" 
+              icon="el-icon-delete" 
+              @click="resetAll"
+              style="flex: 1;"
+            >
+              重置所有
+            </el-button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="instructions">
+        <h2><i class="el-icon-info"></i> 使用说明</h2>
+        <div class="steps">
+          <div class="step">
+            <h3><i class="el-icon-caret-right"></i> 添加组件</h3>
+            <p>从左侧面板拖拽任意输入框组件到选项卡中。支持拖拽到不同的选项卡容器中。</p>
+          </div>
+          <div class="step">
+            <h3><i class="el-icon-caret-right"></i> 双向拖拽</h3>
+            <p>支持将组件从选项卡拖回左侧面板，或在不同选项卡之间自由拖拽组件。</p>
+          </div>
+          <div class="step">
+            <h3><i class="el-icon-caret-right"></i> 重新排序</h3>
+            <p>在选项卡内拖动组件可以改变它们的顺序，拖拽时会有视觉反馈效果。</p>
+          </div>
+          <div class="step">
+            <h3><i class="el-icon-caret-right"></i> 管理组件</h3>
+            <p>点击组件右上角的删除图标移除组件，或使用重置按钮清空所有内容。</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <p>Vue2 + Element UI + vuedraggable 实现 | 双向拖拽选项卡容器 | 高级交互体验</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    Vue.component('draggable', vuedraggable);
+    
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          activeTab: '选项卡1',
+          components: [
+            {
+              id: 1,
+              type: 'text',
+              title: '文本输入框',
+              description: '标准文本输入字段',
+              placeholder: '请输入文本内容',
+              value: ''
+            },
+            {
+              id: 2,
+              type: 'password',
+              title: '密码输入框',
+              description: '安全密码输入字段',
+              placeholder: '请输入密码',
+              value: ''
+            },
+            {
+              id: 3,
+              type: 'textarea',
+              title: '多行文本框',
+              description: '支持多行文本输入',
+              placeholder: '请输入多行文本',
+              value: ''
+            },
+            {
+              id: 4,
+              type: 'number',
+              title: '数字输入框',
+              description: '仅允许输入数字',
+              placeholder: '请输入数字',
+              value: null
+            },
+            {
+              id: 5,
+              type: 'date',
+              title: '日期选择器',
+              description: '选择日期',
+              placeholder: '请选择日期',
+              value: null
+            }
+          ],
+          tabs: [
+            {
+              name: '选项卡1',
+              closable: false,
+              items: []
+            },
+            {
+              name: '选项卡2',
+              closable: true,
+              items: []
+            },
+            {
+              name: '选项卡3',
+              closable: true,
+              items: []
+            }
+          ],
+          nextTabIndex: 4,
+          nextItemId: 100
+        }
+      },
+      computed: {
+        usedComponentsCount() {
+          return this.tabs.reduce((total, tab) => total + tab.items.length, 0);
+        }
+      },
+      methods: {
+        tabLabel(tab) {
+          const count = tab.items.length;
+          return `${tab.name} <span class="component-counter">${count}</span>`;
+        },
+        addTab() {
+          const newTabName = `选项卡${this.nextTabIndex++}`;
+          this.tabs.push({
+            name: newTabName,
+            closable: true,
+            items: []
+          });
+          this.activeTab = newTabName;
+        },
+        removeTab(targetName) {
+          const tabs = this.tabs;
+          let activeName = this.activeTab;
+          
+          if (activeName === targetName) {
+            tabs.forEach((tab, index) => {
+              if (tab.name === targetName) {
+                const nextTab = tabs[index + 1] || tabs[index - 1];
+                if (nextTab) {
+                  activeName = nextTab.name;
+                }
+              }
+            });
+          }
+          
+          this.activeTab = activeName;
+          this.tabs = tabs.filter(tab => tab.name !== targetName);
+        },
+        onAdd(evt, tab) {
+          // 检查是否从左侧面板拖入（新组件）
+          if (evt.pullMode === 'clone') {
+            const newItem = JSON.parse(JSON.stringify(evt.item.__draggable_component__.$attrs['data-item']));
+            newItem.id = this.nextItemId++;
+            tab.items.splice(evt.newIndex, 0, newItem);
+          }
+          // 如果是从其他选项卡拖入，数据已经自动更新
+        },
+        onRemove(evt, tab) {
+          // 当组件被拖拽出选项卡时，这里可以添加额外逻辑
+          // 数据会自动更新，所以不需要额外操作
+        },
+        onComponentAdd(evt) {
+          // 当组件被拖回左侧面板时，从原位置移除
+          const originalTabIndex = evt.item.__draggable_component__.$attrs['data-tab-index'];
+          const originalItemIndex = evt.item.__draggable_component__.$attrs['data-item-index'];
+          
+          if (originalTabIndex !== undefined && originalItemIndex !== undefined) {
+            this.tabs[originalTabIndex].items.splice(originalItemIndex, 1);
+          }
+        },
+        removeItem(tab, index) {
+          tab.items.splice(index, 1);
+        },
+        exportConfig() {
+          const config = {
+            tabs: this.tabs,
+            components: this.components
+          };
+          
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+          const downloadAnchorNode = document.createElement('a');
+          downloadAnchorNode.setAttribute("href", dataStr);
+          downloadAnchorNode.setAttribute("download", "tab-container-config.json");
+          document.body.appendChild(downloadAnchorNode);
+          downloadAnchorNode.click();
+          downloadAnchorNode.remove();
+          
+          this.$message.success('配置已成功导出！');
+        },
+        resetAll() {
+          this.$confirm('确定要重置所有选项卡和组件吗？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.tabs.forEach(tab => {
+              tab.items = [];
+            });
+            this.components.forEach(comp => {
+              comp.value = '';
+            });
+            this.$message.success('已重置所有内容');
+          }).catch(() => {});
+        }
+      }
+    });
+  </script>
+</body>
+</html>
