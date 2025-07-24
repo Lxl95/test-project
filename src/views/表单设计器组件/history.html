@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审批历史组件</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    .header p {
+      font-size: 18px;
+      color: #7f8c8d;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .approval-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    
+    .approval-header {
+      padding: 20px 30px;
+      background: linear-gradient(to right, #3498db, #2c3e50);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .approval-header h2 {
+      font-size: 22px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .status-badge {
+      background: #fff;
+      color: #3498db;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .approval-info {
+      padding: 15px 30px;
+      background: #f8fafc;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+    }
+    
+    .info-label {
+      color: #7f8c8d;
+      font-weight: 500;
+    }
+    
+    .info-value {
+      color: #2c3e50;
+      font-weight: 500;
+    }
+    
+    .timeline-container {
+      padding: 30px;
+    }
+    
+    .el-timeline {
+      padding-left: 20px;
+    }
+    
+    .el-timeline-item {
+      padding-bottom: 30px;
+    }
+    
+    .el-timeline-item__wrapper {
+      padding-left: 20px;
+    }
+    
+    .timeline-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      border-left: 4px solid #3498db;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .timeline-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timeline-card.approved {
+      border-left-color: #2ecc71;
+    }
+    
+    .timeline-card.rejected {
+      border-left-color: #e74c3c;
+    }
+    
+    .timeline-card.pending {
+      border-left-color: #f39c12;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      gap: 15px;
+    }
+    
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #fff;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+    
+    .user-info {
+      flex-grow: 1;
+    }
+    
+    .user-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+    
+    .user-title {
+      color: #7f8c8d;
+      font-size: 14px;
+      background: #f0f7ff;
+      padding: 3px 10px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    
+    .approval-time {
+      color: #95a5a6;
+      font-size: 14px;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .approval-content {
+      background: #f9fbfd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 1px solid #edf2f7;
+    }
+    
+    .approval-content p {
+      color: #34495e;
+      line-height: 1.7;
+    }
+    
+    .status-tag {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .tag-approved {
+      background: rgba(46, 204, 113, 0.15);
+      color: #27ae60;
+    }
+    
+    .tag-rejected {
+      background: rgba(231, 76, 60, 0.15);
+      color: #c0392b;
+    }
+    
+    .tag-pending {
+      background: rgba(243, 156, 18, 0.15);
+      color: #d35400;
+    }
+    
+    .action-icons {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+    }
+    
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #7f8c8d;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+    
+    .icon-btn:hover {
+      color: #3498db;
+    }
+    
+    .mobile-view {
+      display: none;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 26px;
+      }
+      
+      .header p {
+        font-size: 16px;
+      }
+      
+      .approval-header {
+        padding: 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .approval-info {
+        padding: 15px;
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .timeline-container {
+        padding: 15px;
+      }
+      
+      .el-timeline {
+        padding-left: 10px;
+      }
+      
+      .card-header {
+        flex-direction: column;
+      }
+      
+      .user-info {
+        width: 100%;
+      }
+      
+      .status-tag {
+        position: static;
+        margin-top: 10px;
+        display: inline-block;
+      }
+      
+      .desktop-view {
+        display: none;
+      }
+      
+      .mobile-view {
+        display: block;
+      }
+      
+      .avatar {
+        width: 50px;
+        height: 50px;
+      }
+    }
+    
+    /* 动画效果 */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .el-timeline-item {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .el-timeline-item:nth-child(1) { animation-delay: 0.1s; }
+    .el-timeline-item:nth-child(2) { animation-delay: 0.2s; }
+    .el-timeline-item:nth-child(3) { animation-delay: 0.3s; }
+    .el-timeline-item:nth-child(4) { animation-delay: 0.4s; }
+    .el-timeline-item:nth-child(5) { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <div class="header">
+        <h1>审批历史组件</h1>
+        <p>以时间轴形式展示审批流程，支持移动端与PC端，清晰展示审批人信息和审批内容</p >
+      </div>
+      
+      <div class="approval-container">
+        <div class="approval-header">
+          <h2><i class="fas fa-file-contract"></i> 项目立项审批流程</h2>
+          <div class="status-badge">
+            <i class="fas fa-check-circle"></i> 审批完成
+          </div>
+        </div>
+        
+        <div class="approval-info">
+          <div class="info-item">
+            <span class="info-label"><i class="fas fa-user"></i> 申请人：</span>
+            <span class="info-value">张明 (研发部)</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="fas fa-file-alt"></i> 申请标题：</span>
+            <span class="info-value">2024年新产品研发项目立项申请</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="fas fa-calendar"></i> 申请时间：</span>
+            <span class="info-value">2023-11-15 09:30</span>
+          </div>
+        </div>
+        
+        <div class="timeline-container">
+          <el-timeline>
+            <el-timeline-item
+              v-for="(approval, index) in approvalHistory"
+              :key="index"
+              :timestamp="approval.time"
+              placement="top"
+            >
+              <div :class="['timeline-card', approval.status]">
+                <div class="status-tag" :class="'tag-' + approval.status">
+                  <i :class="statusIcons[approval.status]"></i> {{ statusText[approval.status] }}
+                </div>
+                
+                <div class="card-header">
+                  <img :src="approval.avatar" alt="审批人头像" class="avatar">
+                  <div class="user-info">
+                    <div class="user-name">{{ approval.name }}</div>
+                    <div class="user-title">{{ approval.title }}</div>
+                    <div class="approval-time">
+                      <i class="far fa-clock"></i> {{ approval.time }}
+                      <span class="desktop-view">| 处理时长: {{ approval.duration }}</span>
+                      <span class="mobile-view">| {{ approval.duration }}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="approval-content">
+                  <p>{{ approval.content }}</p >
+                </div>
+                
+                <div class="action-icons">
+                  <div class="icon-btn">
+                    <i class="far fa-thumbs-up"></i> 12
+                  </div>
+                  <div class="icon-btn">
+                    <i class="far fa-comment"></i> 回复
+                  </div>
+                  <div class="icon-btn">
+                    <i class="fas fa-paperclip"></i> 附件({{ approval.attachments }})
+                  </div>
+                </div>
+              </div>
+            </el-timeline-item>
+          </el-timeline>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <p>审批历史组件 | 基于 Vue2 + ElementUI 开发 | 支持移动端和PC端响应式设计</p >
+      </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        statusIcons: {
+          approved: 'fas fa-check-circle',
+          rejected: 'fas fa-times-circle',
+          pending: 'fas fa-clock'
+        },
+        statusText: {
+          approved: '已批准',
+          rejected: '已拒绝',
+          pending: '待处理'
+        },
+        approvalHistory: [
+          {
+            name: '李华',
+            title: '技术总监',
+            avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+            time: '2023-11-15 10:25',
+            duration: '2小时15分',
+            content: '项目技术方案合理，团队技术能力足够支持该项目的开发，建议增加对新技术风险的评估。',
+            status: 'approved',
+            attachments: 2
+          },
+          {
+            name: '王芳',
+            title: '财务经理',
+            avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+            time: '2023-11-15 14:40',
+            duration: '1小时30分',
+            content: '预算分配合理，但市场推广部分费用可以适当压缩，建议从120万调整到100万。',
+            status: 'approved',
+            attachments: 1
+          },
+          {
+            name: '赵刚',
+            title: '市场总监',
+            avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+            time: '2023-11-16 09:15',
+            duration: '3小时40分',
+            content: '市场分析部分不够全面，缺少竞争对手近期动态分析，请补充相关内容后再提交审批。',
+            status: 'rejected',
+            attachments: 0
+          },
+          {
+            name: '张明',
+            title: '研发经理',
+            avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
+            time: '2023-11-16 14:20',
+            duration: '4小时',
+            content: '已根据市场部意见补充竞争对手分析报告，并调整了部分市场策略，请重新审批。',
+            status: 'pending',
+            attachments: 3
+          },
+          {
+            name: '刘伟',
+            title: 'CEO',
+            avatar: 'https://randomuser.me/api/portraits/men/41.jpg',
+            time: '2023-11-17 11:05',
+            duration: '45分',
+            content: '项目整体规划合理，团队配备完善，市场前景广阔，同意立项。请各部门按计划执行，重点关注风险控制。',
+            status: 'approved',
+            attachments: 0
+          }
+        ]
+      }
+    });
+  </script>
+</body>
+</html>

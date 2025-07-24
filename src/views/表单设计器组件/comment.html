@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审批意见组件 - Vue2 + ElementUI</title>
+  <!-- 引入Vue2 -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <!-- 引入ElementUI -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.14/lib/index.js"></script>
+  <!-- 引入Font Awesome图标 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      color: #2c3e50;
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+    
+    .header p {
+      color: #7f8c8d;
+      font-size: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .component-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    
+    .mode-tabs {
+      background: #f8f9fa;
+      border-bottom: 1px solid #eaeef5;
+      display: flex;
+    }
+    
+    .mode-tab {
+      flex: 1;
+      padding: 18px 0;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #909399;
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    .mode-tab.active {
+      color: #409EFF;
+    }
+    
+    .mode-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #409EFF;
+    }
+    
+    .component-content {
+      padding: 30px;
+    }
+    
+    /* 编辑模式样式 */
+    .edit-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .submit-btn {
+      align-self: flex-end;
+    }
+    
+    /* 查看模式样式 */
+    .view-container {
+      padding: 15px 0;
+    }
+    
+    .approval-list {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    .approval-item {
+      display: flex;
+      gap: 16px;
+      padding: 20px;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+      border-left: 3px solid #409EFF;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .approval-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #409EFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .approval-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .approval-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .user-info {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .user-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #303133;
+    }
+    
+    .user-title {
+      background: #ecf5ff;
+      color: #409EFF;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .approval-time {
+      color: #909399;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .approval-text {
+      color: #606266;
+      line-height: 1.7;
+      padding-top: 5px;
+      white-space: pre-wrap;
+    }
+    
+    .no-approvals {
+      text-align: center;
+      padding: 40px;
+      color: #909399;
+      font-style: italic;
+    }
+    
+    /* API状态区域 */
+    .api-status {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      padding: 25px;
+    }
+    
+    .api-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #303133;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .api-title i {
+      color: #409EFF;
+    }
+    
+    .api-data {
+      background: #f5f7fa;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #eaeef5;
+      transition: background-color 0.5s;
+    }
+    
+    .api-data.highlight {
+      background-color: rgba(64, 158, 255, 0.1);
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .component-content {
+        padding: 20px;
+      }
+      
+      .approval-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .approval-time {
+        align-self: flex-end;
+      }
+      
+      .header h1 {
+        font-size: 26px;
+      }
+    }
+    
+    .fade-enter-active, .fade-leave-active {
+      transition: opacity 0.3s;
+    }
+    .fade-enter, .fade-leave-to {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <div class="header">
+      <h1>审批意见组件</h1>
+      <p>基于Vue2和ElementUI实现的审批意见组件，支持编辑模式和查看模式，模拟API接口进行数据存储和查询</p>
+    </div>
+    
+    <div class="component-card">
+      <div class="mode-tabs">
+        <div 
+          class="mode-tab" 
+          :class="{ active: activeTab === 'edit' }"
+          @click="activeTab = 'edit'"
+        >
+          <i class="fas fa-edit"></i> 编辑模式
+        </div>
+        <div 
+          class="mode-tab" 
+          :class="{ active: activeTab === 'view' }"
+          @click="activeTab = 'view'; fetchApprovals()"
+        >
+          <i class="fas fa-eye"></i> 查看模式
+        </div>
+      </div>
+      
+      <div class="component-content">
+        <!-- 编辑模式 -->
+        <transition name="fade" mode="out-in">
+          <div v-if="activeTab === 'edit'" class="edit-container">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 5, maxRows: 10 }"
+              placeholder="请输入审批意见..."
+              v-model="newApproval"
+              resize="vertical"
+            ></el-input>
+            <el-button 
+              type="primary" 
+              class="submit-btn" 
+              :loading="submitting"
+              @click="submitApproval"
+            >
+              <i class="fas fa-paper-plane"></i> 提交审批意见
+            </el-button>
+          </div>
+        </transition>
+        
+        <!-- 查看模式 -->
+        <transition name="fade" mode="out-in">
+          <div v-if="activeTab === 'view'" class="view-container">
+            <div v-if="loading" style="text-align: center; padding: 30px;">
+              <i class="el-icon-loading" style="font-size: 24px; color: #409EFF;"></i>
+              <p style="margin-top: 10px; color: #909399;">加载审批数据中...</p>
+            </div>
+            
+            <div v-else>
+              <div v-if="approvals.length === 0" class="no-approvals">
+                <i class="el-icon-document-remove" style="font-size: 48px; margin-bottom: 15px;"></i>
+                <p>暂无审批意见</p>
+              </div>
+              
+              <div v-else class="approval-list">
+                <div 
+                  v-for="approval in approvals" 
+                  :key="approval.id"
+                  class="approval-item"
+                >
+                  <div 
+                    class="avatar"
+                    :style="{ background: getUser(approval.userId).avatarColor }"
+                  >
+                    {{ getUser(approval.userId).name.charAt(0) }}
+                  </div>
+                  <div class="approval-content">
+                    <div class="approval-header">
+                      <div class="user-info">
+                        <span class="user-name">{{ getUser(approval.userId).name }}</span>
+                        <span class="user-title">{{ getUser(approval.userId).title }}</span>
+                      </div>
+                      <div class="approval-time">{{ formatDate(approval.time) }}</div>
+                    </div>
+                    <div class="approval-text">{{ approval.content }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </div>
+    
+    <!-- API状态区域 -->
+    <div class="api-status">
+      <div class="api-title">
+        <i class="fas fa-code"></i> API接口状态
+      </div>
+      <div 
+        class="api-data"
+        :class="{ highlight: apiHighlight }"
+        @animationend="apiHighlight = false"
+      >
+        {{ apiStatus }}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          activeTab: 'edit',
+          newApproval: '',
+          submitting: false,
+          loading: false,
+          approvals: [],
+          apiStatus: '等待操作...',
+          apiHighlight: false,
+          
+          // 模拟用户数据
+          users: [
+            { id: 1, name: "张明", title: "部门经理", avatarColor: "#409EFF" },
+            { id: 2, name: "李华", title: "技术总监", avatarColor: "#E6A23C" },
+            { id: 3, name: "王芳", title: "财务主管", avatarColor: "#67C23A" },
+            { id: 4, name: "赵强", title: "CEO", avatarColor: "#F56C6C" },
+            { id: 5, name: "刘云", title: "HR总监", avatarColor: "#909399" }
+          ],
+          
+          // 当前用户（模拟登录用户）
+          currentUser: { id: 1, name: "张明", title: "部门经理", avatarColor: "#409EFF" }
+        };
+      },
+      methods: {
+        // 提交审批意见
+        submitApproval() {
+          if (!this.newApproval.trim()) {
+            this.$message({
+              message: '请输入审批意见',
+              type: 'warning',
+              duration: 2000
+            });
+            return;
+          }
+          
+          this.submitting = true;
+          
+          // 模拟API调用
+          this.simulateApiCall('POST', {
+            userId: this.currentUser.id,
+            content: this.newApproval
+          });
+          
+          // 创建新审批对象
+          const newApproval = {
+            id: Date.now(),
+            userId: this.currentUser.id,
+            content: this.newApproval,
+            time: new Date()
+          };
+          
+          // 模拟API延迟
+          setTimeout(() => {
+            // 添加到审批列表
+            this.approvals.unshift(newApproval);
+            
+            this.submitting = false;
+            this.newApproval = '';
+            
+            this.$message({
+              message: '审批意见提交成功',
+              type: 'success',
+              duration: 2000
+            });
+            
+            // 自动切换到查看模式
+            this.activeTab = 'view';
+          }, 1000);
+        },
+        
+        // 获取审批列表
+        fetchApprovals() {
+          if (this.approvals.length > 0) return;
+          
+          this.loading = true;
+          
+          // 模拟API调用
+          this.simulateApiCall('GET');
+          
+          // 模拟API延迟
+          setTimeout(() => {
+            // 模拟初始数据
+            this.approvals = [
+              {
+                id: 1,
+                userId: 2,
+                content: "该项目方案基本可行，但预算部分需要进一步细化，建议增加风险控制预案。",
+                time: new Date(Date.now() - 86400000 * 2)
+              },
+              {
+                id: 2,
+                userId: 3,
+                content: "预算方案已审核，符合公司财务规定，同意按此预算执行。",
+                time: new Date(Date.now() - 86400000 * 1)
+              }
+            ];
+            
+            this.loading = false;
+          }, 1500);
+        },
+        
+        // 根据用户ID获取用户信息
+        getUser(userId) {
+          return this.users.find(user => user.id === userId) || this.currentUser;
+        },
+        
+        // 日期格式化
+        formatDate(date) {
+          const d = new Date(date);
+          const now = new Date();
+          const diffInSeconds = Math.floor((now - d) / 1000);
+          
+          if (diffInSeconds < 60) {
+            return '刚刚';
+          } else if (diffInSeconds < 3600) {
+            return `${Math.floor(diffInSeconds / 60)}分钟前`;
+          } else if (diffInSeconds < 86400) {
+            return `${Math.floor(diffInSeconds / 3600)}小时前`;
+          } else {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+          }
+        },
+        
+        // 模拟API调用
+        simulateApiCall(method, data = null) {
+          let status = '';
+          let response = '';
+          
+          if (method === 'GET') {
+            status = '200 OK';
+            response = JSON.stringify(this.approvals, null, 2);
+          } else if (method === 'POST') {
+            status = '201 Created';
+            response = JSON.stringify({ 
+              message: '审批意见已成功提交', 
+              data: {
+                ...data,
+                id: Date.now(),
+                time: new Date().toISOString()
+              }
+            }, null, 2);
+          }
+          
+          // 更新API状态
+          this.apiStatus = `请求方法: ${method}\n状态: ${status}\n\n响应数据:\n${response}`;
+          
+          // 高亮显示
+          this.apiHighlight = true;
+        }
+      },
+      mounted() {
+        // 初始化时模拟一次GET请求
+        this.simulateApiCall('GET');
+      }
+    });
+  </script>
+</body>
+</html>
