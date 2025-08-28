@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高级查询系统 - Vue + ElementUI</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(120deg, #409EFF 0%, #337ecc 100%);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header h1 i {
+      font-size: 32px;
+    }
+    .search-bar {
+      padding: 20px 30px;
+      background: #f8fafc;
+      border-bottom: 1px solid #eaeff5;
+    }
+    .search-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .quick-search {
+      display: flex;
+      gap: 10px;
+    }
+    .condition-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+      min-height: 42px;
+    }
+    .condition-tag {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(120deg, #e6f7ff 0%, #bae7ff 100%);
+      border: 1px solid #91d5ff;
+      border-radius: 20px;
+      padding: 6px 15px;
+      color: #096dd9;
+      font-size: 14px;
+      box-shadow: 0 2px 5px rgba(145, 213, 255, 0.2);
+      transition: all 0.3s;
+    }
+    .condition-tag:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(145, 213, 255, 0.3);
+    }
+    .condition-tag .close {
+      cursor: pointer;
+      margin-left: 8px;
+      color: #8c8c8c;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .condition-tag .close:hover {
+      color: #f5222d;
+      transform: scale(1.2);
+    }
+    .tag-span {
+      display: inline-block;
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .main-content {
+      padding: 20px 30px 30px;
+    }
+    .data-table {
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .popover-content {
+      width: 500px;
+      padding: 15px 20px;
+    }
+    .group-title {
+      font-size: 17px;
+      color: #1890ff;
+      padding: 8px 0;
+      margin: 10px 0 15px;
+      border-bottom: 2px solid #e6f7ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .query-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #595959;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .form-group .el-input, .form-group .el-select {
+      width: 100%;
+    }
+    .popover-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    .empty-tip {
+      text-align: center;
+      color: #bfbfbf;
+      padding: 20px 0;
+      font-size: 14px;
+    }
+    .stats-card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f8fafc;
+      transition: all 0.3s;
+    }
+    .stat-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1890ff;
+      margin: 10px 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #595959;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #8c8c8c;
+      font-size: 14px;
+      background: #f8fafc;
+      border-top: 1px solid #eee;
+    }
+    .highlight {
+      background: linear-gradient(120deg, #fff7e6 0%, #ffe7ba 100%);
+      border: 1px solid #ffd591;
+      color: #fa8c16;
+    }
+    .action-btn {
+      transition: all 0.3s;
+    }
+    .action-btn:hover {
+      transform: scale(1.05);
+    }
+    .no-data {
+      text-align: center;
+      padding: 40px 0;
+      color: #bfbfbf;
+    }
+    .no-data i {
+      font-size: 60px;
+      margin-bottom: 15px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- 主页面头部 -->
+    <div class="header">
+      <h1><i class="fas fa-archive"></i> 档案管理系统 - 高级查询</h1>
+      <div>
+        <el-button type="success" icon="el-icon-refresh" @click="refreshData">刷新数据</el-button>
+      </div>
+    </div>
+
+    <!-- 查询条件展示区域 -->
+    <div class="search-bar">
+      <div class="search-controls">
+        <div class="quick-search">
+          <el-input placeholder="快速搜索..." v-model="quickSearch" style="width: 300px">
+            <el-button slot="append" icon="el-icon-search"></el-button>
+          </el-input>
+          <el-button type="primary" icon="el-icon-search" class="action-btn" v-popover:popover>高级查询</el-button>
+        </div>
+        <div>
+          <el-button type="text" @click="clearAllConditions" :disabled="conditions.length === 0">清空所有条件</el-button>
+        </div>
+      </div>
+      
+      <div class="condition-tags">
+        <div v-for="(condition, index) in conditions" :key="index" 
+             :class="['condition-tag', condition.highlight ? 'highlight' : '']">
+             <!-- <el-popover
+              v-if="condition.valueDisplay && condition.valueDisplay.length > 20"
+              placement="top-start"
+              :title="condition.label"
+              trigger="hover"
+              :content="condition.valueDisplay">
+              <span  slot="reference" class="tag-span">{{ condition.group }} · {{ condition.label }}: {{ condition.valueDisplay }}</span>
+            </el-popover> -->
+            <el-tooltip v-if="condition.valueDisplay && condition.valueDisplay.length > 20" :content="condition.valueDisplay" placement="top" effect="dark">
+              <span  class="tag-span">{{ condition.group }} · {{ condition.label }}: {{ condition.valueDisplay }}</span>
+            </el-tooltip>
+            <span v-else>{{ condition.group }} · {{ condition.label }}: {{ condition.valueDisplay }}</span>
+          <i class="fas fa-times close" @click="removeCondition(index)"></i>
+        </div>
+        <div v-if="conditions.length === 0" class="empty-tip">
+          暂无查询条件，点击"高级查询"按钮添加条件
+        </div>
+      </div>
+    </div>
+
+    <!-- 数据统计卡片 -->
+    <div class="stats-card">
+      <div class="stat-item">
+        <i class="fas fa-users" style="font-size: 32px; color: #1890ff;"></i>
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">总记录数</div>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-building" style="font-size: 32px; color: #52c41a;"></i>
+        <div class="stat-value">{{ stats.departments }}</div>
+        <div class="stat-label">部门数量</div>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-money-bill-wave" style="font-size: 32px; color: #faad14;"></i>
+        <div class="stat-value">¥{{ stats.avgSalary }}</div>
+        <div class="stat-label">平均薪资</div>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-user-check" style="font-size: 32px; color: #13c2c2;"></i>
+        <div class="stat-value">{{ stats.active }}</div>
+        <div class="stat-label">在职人数</div>
+      </div>
+    </div>
+
+    <!-- 数据展示区域 -->
+    <div class="main-content">
+      <el-table class="data-table" :data="filteredData" border stripe v-loading="loading">
+        <el-table-column prop="id" label="ID" width="80" align="center"></el-table-column>
+        <el-table-column prop="name" label="姓名" width="120"></el-table-column>
+        <el-table-column prop="age" label="年龄" width="80" align="center"></el-table-column>
+        <el-table-column prop="gender" label="性别" width="80" align="center">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.gender === '男' ? 'primary' : 'danger'">{{ scope.row.gender }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="department" label="部门" width="150"></el-table-column>
+        <el-table-column prop="position" label="职位"></el-table-column>
+        <el-table-column prop="salary" label="薪资" width="120" align="right">
+          <template slot-scope="scope">
+            ¥{{ scope.row.salary.toLocaleString() }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="120" align="center">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.status === '在职' ? 'success' : 'danger'">{{ scope.row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="lastUpdate" label="最后更新" width="180"></el-table-column>
+      </el-table>
+      
+      <div v-if="filteredData.length === 0" class="no-data">
+        <i class="fas fa-inbox"></i>
+        <h3>没有找到匹配的记录</h3>
+        <p>请尝试修改查询条件</p>
+      </div>
+    </div>
+
+    <!-- 高级查询Popover -->
+    <el-popover
+      ref="popover"
+      placement="bottom"
+      width="500"
+      trigger="click">
+      <div class="popover-content">
+        <!-- 档案组 -->
+        <div class="group-section">
+          <div class="group-title">
+            <i class="fas fa-folder-open"></i>
+            档案组
+          </div>
+          <div class="query-form">
+            <div class="form-group">
+              <label>姓名</label>
+              <el-input v-model="archiveForm.name" placeholder="请输入姓名"></el-input>
+            </div>
+            <div class="form-group">
+              <label>年龄范围</label>
+              <div style="display: flex; gap: 10px;">
+                <el-input v-model="archiveForm.minAge" placeholder="最小年龄" type="number"></el-input>
+                <el-input v-model="archiveForm.maxAge" placeholder="最大年龄" type="number"></el-input>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>性别</label>
+              <el-select v-model="archiveForm.gender" placeholder="请选择性别">
+                <el-option label="男" value="男"></el-option>
+                <el-option label="女" value="女"></el-option>
+              </el-select>
+            </div>
+            <div class="form-group">
+              <label>部门</label>
+              <el-select v-model="archiveForm.department"  multiple collapse-tags placeholder="请选择部门">
+                <el-option label="技术部123456789" value="技术部123456789"></el-option> 
+                <el-option label="市场部123456789" value="市场部123456789"></el-option>
+                <el-option label="财务部123456789" value="财务部123456789"></el-option>
+                <el-option label="人事部123456789" value="人事部123456789"></el-option>
+                <el-option label="行政部123456789" value="行政部123456789"></el-option>
+              </el-select>
+            </div>
+            <div class="form-group">
+              <label>职位</label>
+              <el-input v-model="archiveForm.position" placeholder="请输入职位"></el-input>
+            </div>
+            <div class="form-group">
+              <label>在职状态</label>
+              <el-select v-model="archiveForm.status" placeholder="请选择状态">
+                <el-option label="在职" value="在职"></el-option>
+                <el-option label="离职" value="离职"></el-option>
+                <el-option label="休假" value="休假"></el-option>
+              </el-select>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 费用组 -->
+        <div class="group-section">
+          <div class="group-title">
+            <i class="fas fa-money-bill-wave"></i>
+            费用组
+          </div>
+          <div class="query-form">
+            <div class="form-group">
+              <label>薪资范围</label>
+              <div style="display: flex; gap: 10px;">
+                <el-input v-model="expenseForm.minSalary" placeholder="最低薪资" type="number">
+                  <template slot="prepend">¥</template>
+                </el-input>
+                <el-input v-model="expenseForm.maxSalary" placeholder="最高薪资" type="number">
+                  <template slot="prepend">¥</template>
+                </el-input>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>报销金额</label>
+              <el-input v-model="expenseForm.reimburse" placeholder="请输入报销金额" type="number">
+                <template slot="prepend">¥</template>
+              </el-input>
+            </div>
+            <div class="form-group">
+              <label>费用类型</label>
+              <el-select v-model="expenseForm.expenseType" placeholder="请选择费用类型">
+                <el-option label="交通费" value="交通费"></el-option>
+                <el-option label="餐饮费" value="餐饮费"></el-option>
+                <el-option label="住宿费" value="住宿费"></el-option>
+                <el-option label="办公用品" value="办公用品"></el-option>
+                <el-option label="差旅费" value="差旅费"></el-option>
+              </el-select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="popover-footer">
+          <el-button type="text" @click="resetForm">重置条件</el-button>
+          <div>
+            <el-button @click="closePopover">取消</el-button>
+            <el-button type="primary" @click="addConditions">应用条件</el-button>
+          </div>
+        </div>
+      </div>
+    </el-popover>
+    
+    <div class="footer">
+      <p>高级查询系统 © 2023 档案管理系统 | 共 {{ filteredData.length }} 条记录</p>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          quickSearch: '',
+          loading: false,
+          conditions: [],
+          stats: {
+            total: 0,
+            departments: 0,
+            avgSalary: 0,
+            active: 0
+          },
+          
+          // 档案组表单
+          archiveForm: {
+            name: '',
+            minAge: '',
+            maxAge: '',
+            gender: '',
+            department: '',
+            position: '',
+            status: ''
+          },
+          
+          // 费用组表单
+          expenseForm: {
+            minSalary: '',
+            maxSalary: '',
+            reimburse: '',
+            expenseType: ''
+          },
+          
+          // 模拟数据
+          tableData: [
+            {id: 1, name: '张三', age: 28, gender: '男', department: '技术部', position: '前端工程师', salary: 18500, status: '在职', lastUpdate: '2023-05-15 09:23'},
+            {id: 2, name: '李四', age: 32, gender: '男', department: '市场部', position: '市场经理', salary: 22500, status: '在职', lastUpdate: '2023-06-02 14:45'},
+            {id: 3, name: '王芳', age: 25, gender: '女', department: '财务部', position: '高级会计', salary: 16500, status: '在职', lastUpdate: '2023-05-28 11:12'},
+            {id: 4, name: '刘洋', age: 35, gender: '男', department: '技术部', position: '后端工程师', salary: 21500, status: '离职', lastUpdate: '2023-04-10 16:30'},
+            {id: 5, name: '陈晓', age: 29, gender: '女', department: '人事部', position: 'HR主管', salary: 19500, status: '在职', lastUpdate: '2023-06-12 10:15'},
+            {id: 6, name: '赵明', age: 42, gender: '男', department: '技术部', position: '技术总监', salary: 38500, status: '在职', lastUpdate: '2023-06-01 08:45'},
+            {id: 7, name: '周婷', age: 26, gender: '女', department: '市场部', position: '市场专员', salary: 14500, status: '休假', lastUpdate: '2023-05-20 13:20'},
+            {id: 8, name: '吴刚', age: 38, gender: '男', department: '财务部', position: '财务总监', salary: 32500, status: '在职', lastUpdate: '2023-06-05 17:00'},
+            {id: 9, name: '郑小雨', age: 24, gender: '女', department: '行政部', position: '行政助理', salary: 12500, status: '在职', lastUpdate: '2023-05-29 15:40'},
+            {id: 10, name: '孙伟', age: 31, gender: '男', department: '技术部', position: '全栈工程师', salary: 24500, status: '在职', lastUpdate: '2023-06-10 11:30'}
+          ]
+        }
+      },
+      computed: {
+        // 根据条件过滤数据
+        filteredData() {
+          let data = [...this.tableData];
+          
+          // 快速搜索
+          if (this.quickSearch) {
+            const search = this.quickSearch.toLowerCase();
+            data = data.filter(item => 
+              item.name.includes(search) || 
+              item.department.includes(search) || 
+              item.position.includes(search)
+            );
+          }
+          
+          // 高级查询条件
+          if (this.conditions.length > 0) {
+            return data.filter(item => {
+              return this.conditions.every(condition => {
+                switch (condition.field) {
+                  case 'name':
+                    return item.name.includes(condition.value);
+                  case 'age':
+                    if (condition.operator === '>=') {
+                      return item.age >= parseInt(condition.value);
+                    } else if (condition.operator === '<=') {
+                      return item.age <= parseInt(condition.value);
+                    }
+                    return true;
+                  case 'gender':
+                    return item.gender === condition.value;
+                  case 'department':
+                    return item.department === condition.value;
+                  case 'position':
+                    return item.position.includes(condition.value);
+                  case 'status':
+                    return item.status === condition.value;
+                  case 'salary':
+                    if (condition.operator === '>=') {
+                      return item.salary >= parseInt(condition.value);
+                    } else if (condition.operator === '<=') {
+                      return item.salary <= parseInt(condition.value);
+                    }
+                    return true;
+                  case 'reimburse':
+                    return item.reimburse === parseInt(condition.value);
+                  default:
+                    return true;
+                }
+              });
+            });
+          }
+          
+          return data;
+        }
+      },
+      mounted() {
+        this.calculateStats();
+      },
+      methods: {
+        // 计算统计数据
+        calculateStats() {
+          this.stats.total = this.tableData.length;
+          
+          // 计算部门数量
+          const depts = new Set(this.tableData.map(item => item.department));
+          this.stats.departments = depts.size;
+          
+          // 计算平均薪资
+          const totalSalary = this.tableData.reduce((sum, item) => sum + item.salary, 0);
+          this.stats.avgSalary = Math.round(totalSalary / this.tableData.length).toLocaleString();
+          
+          // 计算在职人数
+          this.stats.active = this.tableData.filter(item => item.status === '在职').length;
+        },
+        
+        // 添加查询条件
+        addConditions() {
+          this.conditions = []
+          // 添加档案组条件
+          if (this.archiveForm.name) {
+            this.addCondition('档案组', '姓名', '包含', this.archiveForm.name, 'name');
+          }
+          if (this.archiveForm.minAge) {
+            this.addCondition('档案组', '最小年龄', '>=', this.archiveForm.minAge, 'age', true);
+          }
+          if (this.archiveForm.maxAge) {
+            this.addCondition('档案组', '最大年龄', '<=', this.archiveForm.maxAge, 'age', true);
+          }
+          if (this.archiveForm.gender) {
+            this.addCondition('档案组', '性别', '=', this.archiveForm.gender, 'gender');
+          }
+          if (this.archiveForm.department && this.archiveForm.department.length > 0) {
+            this.addCondition('档案组', '部门', '=', this.archiveForm.department.join(','), 'department');
+          }
+          if (this.archiveForm.position) {
+            this.addCondition('档案组', '职位', '包含', this.archiveForm.position, 'position');
+          }
+          if (this.archiveForm.status) {
+            this.addCondition('档案组', '状态', '=', this.archiveForm.status, 'status');
+          }
+          
+          // 添加费用组条件
+          if (this.expenseForm.minSalary) {
+            this.addCondition('费用组', '最低薪资', '>=', this.expenseForm.minSalary, 'salary', false, '¥');
+          }
+          if (this.expenseForm.maxSalary) {
+            this.addCondition('费用组', '最高薪资', '<=', this.expenseForm.maxSalary, 'salary', false, '¥');
+          }
+          if (this.expenseForm.reimburse) {
+            this.addCondition('费用组', '报销金额', '=', this.expenseForm.reimburse, 'reimburse', false, '¥');
+          }
+          if (this.expenseForm.expenseType) {
+            this.addCondition('费用组', '费用类型', '=', this.expenseForm.expenseType, 'expenseType');
+          }
+          
+          this.closePopover();
+          this.$message.success('查询条件已添加');
+        },
+        
+        // 添加单个条件
+        addCondition(group, label, operator, value, field, isNumber = false, prefix = '') {
+          const condition = {
+            group,
+            label,
+            operator,
+            value,
+            field,
+            valueDisplay: prefix + value,
+            // highlight: true
+          };
+          
+          // 添加条件
+          this.conditions.push(condition);
+          
+          // 3秒后取消高亮
+          setTimeout(() => {
+            condition.highlight = false;
+          }, 3000);
+        },
+        
+        // 移除单个条件
+        removeCondition(index) {
+          this.conditions.splice(index, 1);
+          this.$message.info('已移除查询条件');
+        },
+        
+        // 清空所有条件
+        clearAllConditions() {
+          this.conditions = [];
+          this.$message.info('已清空所有查询条件');
+        },
+        
+        // 重置表单
+        resetForm() {
+          this.archiveForm = {
+            name: '',
+            minAge: '',
+            maxAge: '',
+            gender: '',
+            department: '',
+            position: '',
+            status: ''
+          };
+          this.expenseForm = {
+            minSalary: '',
+            maxSalary: '',
+            reimburse: '',
+            expenseType: ''
+          };
+          this.$message.info('已重置查询条件');
+        },
+        
+        // 关闭Popover
+        closePopover() {
+          this.$refs.popover.doClose();
+        },
+        
+        // 刷新数据
+        refreshData() {
+          this.loading = true;
+          setTimeout(() => {
+            this.loading = false;
+            this.$message.success('数据已刷新');
+          }, 800);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

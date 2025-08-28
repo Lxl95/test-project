@@ -365,7 +365,34 @@ const routes = [
     component: () => import('../views/表单设计器组件/drag.vue'),
     meta: {
       name: 'drag',
-      title: '容器'
+      title: '选项卡容器'
+    }
+  },
+  {
+    path: '/SeniorQuery',
+    name: 'SeniorQuery',
+    component: () => import('../views/表单设计器组件/SeniorQuery.vue'),
+    meta: {
+      name: 'SeniorQuery',
+      title: '高级查询'
+    }
+  },
+  {
+    path: '/upload',
+    name: 'upload',
+    component: () => import('../views/表单设计器组件/upload.vue'),
+    meta: {
+      name: 'upload',
+      title: '上传预览'
+    }
+  },
+  {
+    path: '/EngDetail',
+    name: 'EngDetail',
+    component: () => import('../views/工程详情页/index.vue'),
+    meta: {
+      name: 'EngDetail',
+      title: '工程详情'
     }
   }
 ];
