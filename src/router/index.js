@@ -389,10 +389,10 @@ const routes = [
   {
     path: '/EngDetail',
     name: 'EngDetail',
-    component: () => import('../views/工程详情页/index.vue'),
+    component: () => import('../views/报表总览/index.vue'),
     meta: {
       name: 'EngDetail',
-      title: '工程详情'
+      title: '报表总览'
     }
   }
 ];
