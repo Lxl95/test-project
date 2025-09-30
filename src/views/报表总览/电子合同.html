@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电子合同查询系统</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: "PingFang SC", "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .contract-app {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .app-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            border-radius: 16px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .app-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .app-title i {
+            margin-right: 12px;
+            font-size: 28px;
+        }
+        .app-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .search-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            flex: 1;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 15px;
+        }
+        .filter-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            color: #2c3e50;
+        }
+        .filter-title i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .filter-tag {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+            border: 1px solid #dcdfe6;
+            background: white;
+            cursor: pointer;
+        }
+        .filter-tag.active {
+            background: #3498db;
+            border-color: #3498db;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        .contract-list {
+            margin-bottom: 80px;
+        }
+        .contract-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid #3498db;
+            position: relative;
+            overflow: hidden;
+        }
+        .contract-card:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        .contract-card.expired {
+            border-left-color: #e74c3c;
+        }
+        .contract-card.pending {
+            border-left-color: #f39c12;
+        }
+        .contract-card.effective {
+            border-left-color: #2ecc71;
+        }
+        .contract-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        .contract-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            padding-right: 15px;
+        }
+        .contract-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .status-effective {
+            background: rgba(46, 204, 113, 0.15);
+            color: #27ae60;
+        }
+        .status-expired {
+            background: rgba(231, 76, 60, 0.15);
+            color: #c0392b;
+        }
+        .status-pending {
+            background: rgba(243, 156, 18, 0.15);
+            color: #d35400;
+        }
+        .contract-id {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .contract-id i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #3498db;
+        }
+        .contract-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .contract-detail-item {
+            font-size: 14px;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+        }
+        .contract-detail-label {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .contract-detail-label i {
+            margin-right: 7px;
+            font-size: 14px;
+            color: #3498db;
+        }
+        .contract-detail-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .contract-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 18px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+        }
+        .contract-date {
+            font-size: 13px;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+        }
+        .contract-date i {
+            margin-right: 6px;
+        }
+        .contract-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.25);
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
+        }
+        .download-btn:active {
+            transform: translateY(0);
+        }
+        .download-btn i {
+            margin-right: 6px;
+            font-size: 14px;
+        }
+        .share-btn {
+            background: #ecf0f1;
+            color: #7f8c8d;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .share-btn:hover {
+            background: #dfe6e9;
+        }
+        .share-btn i {
+            margin-right: 6px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .empty-icon {
+            font-size: 70px;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        .empty-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 13px;
+            color: #7f8c8d;
+            padding: 5px 15px;
+            transition: all 0.3s;
+        }
+        .nav-item.active {
+            color: #3498db;
+        }
+        .nav-icon {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        .date-filter {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .date-filter-item {
+            flex: 1;
+        }
+        .more-actions {
+            text-align: center;
+            padding: 25px 0;
+        }
+        .load-more {
+            padding: 12px 30px;
+            background: white;
+            border: 1px solid #dcdfe6;
+            border-radius: 25px;
+            color: #3498db;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+        .load-more:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        .download-progress {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        .download-modal {
+            text-align: center;
+            padding: 20px;
+        }
+        .download-modal-icon {
+            font-size: 50px;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 600px) {
+            .contract-details {
+                grid-template-columns: 1fr;
+            }
+            .search-box {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .contract-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .contract-header {
+                flex-direction: column;
+            }
+            .contract-status {
+                margin-top: 10px;
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="contract-app">
+        <div class="app-header">
+            <h2 class="app-title"><i class="fas fa-file-contract"></i>电子合同查询系统</h2>
+            <p class="app-subtitle">安全、便捷的电子合同管理平台</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <el-input 
+                    v-model="searchQuery" 
+                    placeholder="搜索合同名称、编号或对方名称" 
+                    class="search-input"
+                    clearable
+                >
+                    <el-button slot="append" icon="el-icon-search" @click="searchContracts"></el-button>
+                </el-input>
+                <el-button icon="el-icon-filter" @click="showFilter = !showFilter">筛选</el-button>
+            </div>
+            
+            <div class="filter-section" v-show="showFilter">
+                <div class="filter-title"><i class="fas fa-filter"></i>筛选条件</div>
+                <div class="date-filter">
+                    <el-date-picker
+                        class="date-filter-item"
+                        v-model="filterDateRange"
+                        type="daterange"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        value-format="yyyy-MM-dd"
+                        size="small">
+                    </el-date-picker>
+                </div>
+                <div class="filter-tags">
+                    <span 
+                        v-for="status in statusOptions" 
+                        :key="status.value" 
+                        class="filter-tag"
+                        :class="{ active: selectedStatus.includes(status.value) }"
+                        @click="handleStatusChange(status.value)"
+                    >
+                        {{ status.label }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="contract-list">
+            <div v-if="filteredContracts.length === 0" class="empty-state">
+                <i class="fas fa-file-excel empty-icon"></i>
+                <p class="empty-text">暂无合同数据</p>
+                <el-button type="primary" icon="el-icon-refresh" @click="resetFilters">重置筛选条件</el-button>
+            </div>
+            
+            <div 
+                v-for="contract in filteredContracts" 
+                :key="contract.id" 
+                class="contract-card"
+                :class="contract.status"
+            >
+                <div class="contract-header">
+                    <div class="contract-title">{{ contract.title }}</div>
+                    <span 
+                        class="contract-status" 
+                        :class="'status-' + contract.status"
+                    >
+                        {{ getStatusText(contract.status) }}
+                    </span>
+                </div>
+                
+                <div class="contract-id">
+                    <i class="fas fa-hashtag"></i>
+                    合同编号: {{ contract.contractNo }}
+                </div>
+                
+                <div class="contract-details">
+                    <div class="contract-detail-item">
+                        <span class="contract-detail-label"><i class="fas fa-building"></i>对方名称</span>
+                        <span class="contract-detail-value">{{ contract.party }}</span>
+                    </div>
+                    <div class="contract-detail-item">
+                        <span class="contract-detail-label"><i class="fas fa-money-bill-wave"></i>合同金额</span>
+                        <span class="contract-detail-value">{{ contract.amount }}</span>
+                    </div>
+                    <div class="contract-detail-item">
+                        <span class="contract-detail-label"><i class="fas fa-calendar-alt"></i>签订日期</span>
+                        <span class="contract-detail-value">{{ contract.signDate }}</span>
+                    </div>
+                    <div class="contract-detail-item">
+                        <span class="contract-detail-label"><i class="fas fa-clock"></i>有效期</span>
+                        <span class="contract-detail-value">{{ contract.validDate }}</span>
+                    </div>
+                </div>
+                
+                <div class="download-progress" v-if="contract.downloading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    下载中... {{ contract.downloadProgress }}%
+                    <el-progress :percentage="contract.downloadProgress" :stroke-width="12" status="success"></el-progress>
+                </div>
+                
+                <div class="contract-footer">
+                    <div class="contract-date">
+                        <i class="fas fa-sync-alt"></i>
+                        更新于: {{ contract.updateTime }}
+                    </div>
+                    <div class="contract-actions">
+                        <button class="download-btn" @click="downloadContract(contract)">
+                            <i class="fas fa-download"></i>下载合同
+                        </button>
+                        <button class="share-btn" @click="shareContract(contract)">
+                            <i class="fas fa-share-alt"></i>分享
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="more-actions" v-if="filteredContracts.length > 0">
+                <el-button class="load-more" @click="loadMore">
+                    <i class="fas fa-redo"></i> 加载更多合同
+                </el-button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <i class="fas fa-file-contract nav-icon"></i>
+                <span>合同</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-search nav-icon"></i>
+                <span>查询</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-download nav-icon"></i>
+                <span>下载</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>我的</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    searchQuery: '',
+                    showFilter: true,
+                    filterDateRange: [],
+                    selectedStatus: [],
+                    contracts: [
+                        {
+                            id: 1,
+                            title: '软件开发技术服务合同',
+                            contractNo: 'HT20230001',
+                            party: '上海科技有限公司',
+                            signDate: '2023-01-15',
+                            validDate: '2023-01-15 至 2024-01-14',
+                            amount: '￥125,000.00',
+                            updateTime: '2023-06-10',
+                            status: 'effective',
+                            downloading: false,
+                            downloadProgress: 0
+                        },
+                        {
+                            id: 2,
+                            title: '产品采购框架协议',
+                            contractNo: 'HT20230025',
+                            party: '北京智能设备有限公司',
+                            signDate: '2023-02-20',
+                            validDate: '2023-02-20 至 2023-08-19',
+                            amount: '￥89,500.00',
+                            updateTime: '2023-07-15',
+                            status: 'expired',
+                            downloading: false,
+                            downloadProgress: 0
+                        },
+                        {
+                            id: 3,
+                            title: '战略合作备忘录',
+                            contractNo: 'HT20230048',
+                            party: '深圳创新集团',
+                            signDate: '2023-03-10',
+                            validDate: '2023-03-10 至 2026-03-09',
+                            amount: '框架协议',
+                            updateTime: '2023-05-22',
+                            status: 'effective',
+                            downloading: false,
+                            downloadProgress: 0
+                        },
+                        {
+                            id: 4,
+                            title: '数据服务协议',
+                            contractNo: 'HT20230072',
+                            party: '广州数据科技有限公司',
+                            signDate: '2023-04-05',
+                            validDate: '2023-04-05 至 2023-10-04',
+                            amount: '￥56,800.00',
+                            updateTime: '2023-08-01',
+                            status: 'pending',
+                            downloading: false,
+                            downloadProgress: 0
+                        },
+                        {
+                            id: 5,
+                            title: '保密协议',
+                            contractNo: 'HT20230096',
+                            party: '杭州信息安全有限公司',
+                            signDate: '2023-05-12',
+                            validDate: '2023-05-12 至 2025-05-11',
+                            amount: '无金额',
+                            updateTime: '2023-06-28',
+                            status: 'effective',
+                            downloading: false,
+                            downloadProgress: 0
+                        }
+                    ],
+                    statusOptions: [
+                        { label: '生效中', value: 'effective' },
+                        { label: '已过期', value: 'expired' },
+                        { label: '待签署', value: 'pending' }
+                    ]
+                }
+            },
+            computed: {
+                filteredContracts() {
+                    let result = this.contracts;
+                    
+                    // 根据搜索词过滤
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        result = result.filter(contract => 
+                            contract.title.toLowerCase().includes(query) ||
+                            contract.contractNo.toLowerCase().includes(query) ||
+                            contract.party.toLowerCase().includes(query)
+                        );
+                    }
+                    
+                    // 根据状态过滤
+                    if (this.selectedStatus.length > 0) {
+                        result = result.filter(contract => 
+                            this.selectedStatus.includes(contract.status)
+                        );
+                    }
+                    
+                    // 根据日期范围过滤
+                    if (this.filterDateRange && this.filterDateRange.length === 2) {
+                        const startDate = new Date(this.filterDateRange[0]);
+                        const endDate = new Date(this.filterDateRange[1]);
+                        
+                        result = result.filter(contract => {
+                            const signDate = new Date(contract.signDate);
+                            return signDate >= startDate && signDate <= endDate;
+                        });
+                    }
+                    
+                    return result;
+                }
+            },
+            methods: {
+                getStatusText(status) {
+                    const statusMap = {
+                        'effective': '生效中',
+                        'expired': '已过期',
+                        'pending': '待签署'
+                    };
+                    return statusMap[status] || '未知状态';
+                },
+                handleStatusChange(status) {
+                    const index = this.selectedStatus.indexOf(status);
+                    if (index > -1) {
+                        this.selectedStatus.splice(index, 1);
+                    } else {
+                        this.selectedStatus.push(status);
+                    }
+                },
+                searchContracts() {
+                    // 在实际应用中，这里会调用API进行搜索
+                    console.log('搜索合同:', this.searchQuery);
+                },
+                downloadContract(contract) {
+                    // 模拟下载过程
+                    contract.downloading = true;
+                    contract.downloadProgress = 0;
+                    
+                    const interval = setInterval(() => {
+                        contract.downloadProgress += 10;
+                        if (contract.downloadProgress >= 100) {
+                            clearInterval(interval);
+                            contract.downloading = false;
+                            
+                            // 显示下载完成提示
+                            this.$notify({
+                                title: '下载成功',
+                                message: `合同 "${contract.title}" 已下载完成`,
+                                type: 'success',
+                                duration: 3000
+                            });
+                            
+                            // 在实际应用中，这里会触发文件下载
+                            console.log(`下载合同: ${contract.title}`);
+                        }
+                    }, 200);
+                },
+                shareContract(contract) {
+                    this.$message({
+                        message: `分享合同: ${contract.title}`,
+                        type: 'info'
+                    });
+                },
+                loadMore() {
+                    // 在实际应用中，这里会加载更多合同数据
+                    this.$message({
+                        message: '加载更多合同数据',
+                        type: 'info'
+                    });
+                },
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.filterDateRange = [];
+                    this.selectedStatus = [];
+                    this.$message({
+                        message: '筛选条件已重置',
+                        type: 'success'
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

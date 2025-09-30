@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>水费缴纳 - 水务服务</title>
+    <!-- 引入Element UI样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入Vue和Element UI -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.5;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .water-fee-container {
+            padding: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 8px;
+            color: #1e88e5;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .info-item {
+            width: 48%;
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .fee-detail {
+            margin-top: 10px;
+        }
+        
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .fee-item:last-child {
+            border-bottom: none;
+        }
+        
+        .fee-label {
+            color: #666;
+        }
+        
+        .fee-value {
+            font-weight: 500;
+        }
+        
+        .total-fee {
+            font-size: 20px;
+            font-weight: 600;
+            color: #f56c6c;
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .payment-methods {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .payment-method {
+            flex: 1;
+            min-width: 100px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .payment-method.active {
+            border-color: #1e88e5;
+            background-color: #f0f7ff;
+        }
+        
+        .payment-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .payment-name {
+            font-size: 14px;
+        }
+        
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .action-buttons .el-button {
+            flex: 1;
+            height: 50px;
+            font-size: 16px;
+            border-radius: 25px;
+        }
+        
+        .history-record {
+            margin-top: 20px;
+        }
+        
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .record-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .record-amount {
+            font-weight: 500;
+        }
+        
+        .record-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .status-paid {
+            background-color: #f0f9ff;
+            color: #1e88e5;
+        }
+        
+        .footer {
+            margin-top: auto;
+            padding: 15px 0;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .water-fee-container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .info-item {
+                width: 100%;
+            }
+            
+            .payment-method {
+                min-width: 80px;
+            }
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+        
+        .el-loading-spinner .circular {
+            width: 30px;
+            height: 30px;
+        }
+        
+        /* 自定义Element UI组件样式 */
+        .el-input__inner {
+            height: 45px;
+            border-radius: 8px;
+        }
+        
+        .el-button {
+            border-radius: 8px;
+        }
+        
+        .el-dialog {
+            width: 90% !important;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="water-fee-container">
+            <div class="header">
+                <h1>水费缴纳</h1>
+                <p>便捷缴费，用心服务</p>
+            </div>
+            
+            <!-- 用户信息卡片 -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="el-icon-user-solid"></i> 用户信息
+                </div>
+                <div class="user-info">
+                    <div class="info-item">
+                        <div class="info-label">户号</div>
+                        <div class="info-value">{{ userInfo.accountNo }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">户名</div>
+                        <div class="info-value">{{ userInfo.customerName }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">地址</div>
+                        <div class="info-value">{{ userInfo.address }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">上次抄表日期</div>
+                        <div class="info-value">{{ userInfo.lastReadingDate }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 欠费信息卡片 -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="el-icon-wallet"></i> 欠费信息
+                </div>
+                <div class="fee-detail">
+                    <div class="fee-item">
+                        <span class="fee-label">本期水费</span>
+                        <span class="fee-value">¥ {{ currentFee.waterFee }}</span>
+                    </div>
+                    <div class="fee-item">
+                        <span class="fee-label">污水处理费</span>
+                        <span class="fee-value">¥ {{ currentFee.sewageFee }}</span>
+                    </div>
+                    <div class="fee-item">
+                        <span class="fee-label">水资源费</span>
+                        <span class="fee-value">¥ {{ currentFee.resourceFee }}</span>
+                    </div>
+                    <div class="fee-item">
+                        <span class="fee-label">滞纳金</span>
+                        <span class="fee-value">¥ {{ currentFee.lateFee }}</span>
+                    </div>
+                    <div class="total-fee">
+                        合计: ¥ {{ totalFee }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 缴费金额输入 -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="el-icon-edit"></i> 缴费金额
+                </div>
+                <el-input 
+                    v-model="paymentAmount" 
+                    placeholder="请输入缴费金额" 
+                    type="number"
+                    @input="validateAmount">
+                    <template slot="append">元</template>
+                </el-input>
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <el-button 
+                        v-for="amount in quickAmounts" 
+                        :key="amount"
+                        @click="selectAmount(amount)"
+                        :type="paymentAmount == amount ? 'primary' : ''"
+                        size="small">
+                        {{ amount }}元
+                    </el-button>
+                </div>
+            </div>
+            
+            <!-- 支付方式选择 -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="el-icon-bank-card"></i> 支付方式
+                </div>
+                <div class="payment-methods">
+                    <div 
+                        v-for="method in paymentMethods" 
+                        :key="method.id"
+                        :class="['payment-method', { active: selectedMethod === method.id }]"
+                        @click="selectMethod(method.id)">
+                        <div class="payment-icon">{{ method.icon }}</div>
+                        <div class="payment-name">{{ method.name }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="action-buttons">
+                <el-button type="primary" @click="confirmPayment" :loading="loading">
+                    {{ loading ? '支付中...' : '立即支付' }}
+                </el-button>
+                <el-button @click="showHistory">缴费记录</el-button>
+            </div>
+            
+            <!-- 缴费记录 -->
+            <div class="card history-record" v-if="showRecords">
+                <div class="card-title">
+                    <i class="el-icon-tickets"></i> 最近缴费记录
+                </div>
+                <div v-for="record in paymentHistory" :key="record.id" class="record-item">
+                    <div>
+                        <div class="record-date">{{ record.date }}</div>
+                        <div>金额: {{ record.amount }}元</div>
+                    </div>
+                    <div>
+                        <div class="record-amount">{{ record.paymentMethod }}</div>
+                        <span :class="['record-status', 'status-paid']">已支付</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>水务服务热线: 12345</p>
+                <p>© 2023 智慧水务 版权所有</p>
+            </div>
+        </div>
+        
+        <!-- 支付确认对话框 -->
+        <el-dialog
+            title="确认支付"
+            :visible.sync="confirmDialogVisible"
+            width="90%"
+            center>
+            <div style="text-align: center; padding: 20px 0;">
+                <h3 style="margin-bottom: 10px;">请确认支付信息</h3>
+                <p>户号: {{ userInfo.accountNo }}</p>
+                <p>户名: {{ userInfo.customerName }}</p>
+                <p style="font-size: 24px; color: #f56c6c; margin: 15px 0;">支付金额: ¥{{ paymentAmount }}</p>
+                <p>支付方式: {{ getMethodName(selectedMethod) }}</p>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="confirmDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="processPayment">确认支付</el-button>
+            </span>
+        </el-dialog>
+        
+        <!-- 支付结果对话框 -->
+        <el-dialog
+            :title="paymentResult.title"
+            :visible.sync="resultDialogVisible"
+            width="90%"
+            center>
+            <div style="text-align: center; padding: 20px 0;">
+                <i :class="paymentResult.icon" :style="{color: paymentResult.color, fontSize: '50px', marginBottom: '15px'}"></i>
+                <p style="font-size: 18px; margin-bottom: 10px;">{{ paymentResult.message }}</p>
+                <p v-if="paymentResult.success">订单号: {{ orderNo }}</p>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="resultDialogVisible = false">确定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    userInfo: {
+                        accountNo: '20230528001',
+                        customerName: '张先生',
+                        address: '北京市朝阳区某某街道某某小区1栋101室',
+                        lastReadingDate: '2023-05-20'
+                    },
+                    currentFee: {
+                        waterFee: 85.50,
+                        sewageFee: 25.30,
+                        resourceFee: 8.20,
+                        lateFee: 0.00
+                    },
+                    paymentAmount: '',
+                    quickAmounts: [50, 100, 150, 200],
+                    paymentMethods: [
+                        { id: 1, name: '微信支付', icon: '💳' },
+                        { id: 2, name: '支付宝', icon: '💰' },
+                        { id: 3, name: '银联支付', icon: '🏦' },
+                        { id: 4, name: '余额支付', icon: '💎' }
+                    ],
+                    selectedMethod: 1,
+                    showRecords: false,
+                    paymentHistory: [
+                        { id: 1, date: '2023-04-25', amount: 118.50, paymentMethod: '微信支付' },
+                        { id: 2, date: '2023-03-22', amount: 105.80, paymentMethod: '支付宝' },
+                        { id: 3, date: '2023-02-20', amount: 98.30, paymentMethod: '微信支付' }
+                    ],
+                    confirmDialogVisible: false,
+                    resultDialogVisible: false,
+                    loading: false,
+                    paymentResult: {
+                        success: false,
+                        title: '',
+                        message: '',
+                        icon: '',
+                        color: ''
+                    },
+                    orderNo: ''
+                }
+            },
+            computed: {
+                totalFee() {
+                    return (this.currentFee.waterFee + 
+                           this.currentFee.sewageFee + 
+                           this.currentFee.resourceFee + 
+                           this.currentFee.lateFee).toFixed(2);
+                }
+            },
+            methods: {
+                validateAmount() {
+                    // 限制输入金额不能为负数
+                    if (this.paymentAmount < 0) {
+                        this.paymentAmount = '';
+                    }
+                },
+                selectAmount(amount) {
+                    this.paymentAmount = amount;
+                },
+                selectMethod(methodId) {
+                    this.selectedMethod = methodId;
+                },
+                confirmPayment() {
+                    if (!this.paymentAmount || this.paymentAmount <= 0) {
+                        this.$message.error('请输入有效的缴费金额');
+                        return;
+                    }
+                    
+                    this.confirmDialogVisible = true;
+                },
+                processPayment() {
+                    this.confirmDialogVisible = false;
+                    this.loading = true;
+                    
+                    // 模拟支付过程
+                    setTimeout(() => {
+                        this.loading = false;
+                        // 模拟支付成功（80%概率成功）
+                        const success = Math.random() > 0.2;
+                        
+                        if (success) {
+                            this.paymentResult = {
+                                success: true,
+                                title: '支付成功',
+                                message: '水费缴纳成功，感谢您的使用！',
+                                icon: 'el-icon-success',
+                                color: '#67C23A'
+                            };
+                            // 生成随机订单号
+                            this.orderNo = 'WT' + Date.now();
+                        } else {
+                            this.paymentResult = {
+                                success: false,
+                                title: '支付失败',
+                                message: '支付失败，请检查支付方式或账户余额后重试',
+                                icon: 'el-icon-error',
+                                color: '#F56C6C'
+                            };
+                        }
+                        
+                        this.resultDialogVisible = true;
+                    }, 2000);
+                },
+                showHistory() {
+                    this.showRecords = !this.showRecords;
+                },
+                getMethodName(methodId) {
+                    const method = this.paymentMethods.find(m => m.id === methodId);
+                    return method ? method.name : '';
+                }
+            },
+            mounted() {
+                // 默认选择全部欠费金额
+                this.paymentAmount = this.totalFee;
+            }
+        });
+    </script>
+</body>
+</html>
