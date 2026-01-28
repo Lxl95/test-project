@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue2 全局遮罩覆盖Element UI弹框</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', SimSun, sans-serif;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #4a6ee0, #6a11cb);
+            color: white;
+            padding: 24px 32px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 32px;
+        }
+        
+        .description {
+            margin-bottom: 24px;
+            line-height: 1.6;
+            color: #555;
+            font-size: 16px;
+        }
+        
+        .demo-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature {
+            flex: 1;
+            min-width: 200px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .feature i {
+            font-size: 24px;
+            color: #4a6ee0;
+            margin-bottom: 10px;
+        }
+        
+        .instructions {
+            background: #eef2ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #4a6ee0;
+        }
+        
+        .instructions h3 {
+            color: #4a6ee0;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        /* 全局遮罩样式 */
+        .global-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .global-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .progress-container {
+            width: 80%;
+            max-width: 400px;
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 12px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #4a6ee0, #6a11cb);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .status-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .status-detail {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            max-width: 80%;
+            margin-bottom: 20px;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .dialog-footer {
+            position: relative;
+        }
+        
+        .close-overlay-btn {
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .feature {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <div class="header">
+            <h1>Vue2 全局遮罩覆盖Element UI弹框</h1>
+            <p>解决全局遮罩无法覆盖Element UI弹框的问题</p>
+        </div>
+        
+        <div class="content">
+            <div class="description">
+                <p>此示例演示了如何在Vue2中创建一个能够完全覆盖Element UI弹框的全局遮罩层。通过手动DOM操作和设置更高的z-index，确保遮罩层能够拦截所有用户交互。</p>
+            </div>
+            
+            <div class="feature-list">
+                <div class="feature">
+                    <i class="fas fa-layer-group"></i>
+                    <h3>高z-index</h3>
+                    <p>设置足够高的z-index覆盖弹框</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-expand"></i>
+                    <h3>全局覆盖</h3>
+                    <p>遮罩层覆盖整个视口</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-mouse"></i>
+                    <h3>事件拦截</h3>
+                    <p>阻止所有用户交互</p>
+                </div>
+            </div>
+            
+            <div class="demo-controls">
+                <el-button type="primary" size="medium" @click="dialogVisible = true">打开对话框</el-button>
+                <el-button type="success" size="medium" @click="simulateQuickOperations">模拟快速操作</el-button>
+                <el-button type="warning" size="medium" @click="toggleGlobalOverlay">切换全局遮罩</el-button>
+            </div>
+            
+            <div class="instructions">
+                <h3>解决方案说明</h3>
+                <ul>
+                    <li>全局遮罩使用fixed定位，覆盖整个视口</li>
+                    <li>设置z-index为9999，高于Element UI弹框的z-index（通常为2000）</li>
+                    <li>使用手动DOM操作将遮罩层添加到body元素</li>
+                    <li>使用Vue2的mounted和beforeDestroy生命周期管理遮罩DOM</li>
+                    <li>通过pointer-events属性确保遮罩层能够拦截所有用户交互</li>
+                </ul>
+            </div>
+            
+            <!-- Element UI 对话框 -->
+            <el-dialog
+                title="操作对话框"
+                :visible.sync="dialogVisible"
+                width="600px"
+                :before-close="handleClose">
+                <div>
+                    <p>请选择以下操作之一，当一个操作正在进行时，全局遮罩会覆盖整个页面。</p>
+                    
+                    <div style="margin-top: 20px;">
+                        <el-alert
+                            title="操作提示"
+                            description="当前操作完成前，全局遮罩会阻止所有用户交互"
+                            type="info"
+                            :closable="false"
+                            show-icon>
+                        </el-alert>
+                    </div>
+                </div>
+                
+                <div slot="footer" class="dialog-footer">
+                    <el-button 
+                        :disabled="processing" 
+                        @click="handleAction('upload')"
+                        type="primary"
+                        icon="el-icon-upload">
+                        上传文件
+                    </el-button>
+                    <el-button 
+                        :disabled="processing" 
+                        @click="handleAction('process')"
+                        type="success"
+                        icon="el-icon-cpu">
+                        数据处理
+                    </el-button>
+                    <el-button 
+                        :disabled="processing" 
+                        @click="handleAction('save')"
+                        type="warning"
+                        icon="el-icon-document">
+                        保存结果
+                    </el-button>
+                </div>
+            </el-dialog>
+        </div>
+    </div>
+
+    <!-- 引入Vue2和Element UI -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    dialogVisible: false,
+                    processing: false,
+                    progressPercentage: 0,
+                    statusText: '处理中...',
+                    statusDetail: '请等待当前操作完成',
+                    currentAction: '',
+                    showGlobalOverlay: false,
+                    overlayElement: null
+                }
+            },
+            mounted() {
+                // 创建全局遮罩元素
+                this.createOverlayElement();
+            },
+            beforeDestroy() {
+                // 移除全局遮罩元素
+                if (this.overlayElement && this.overlayElement.parentNode) {
+                    this.overlayElement.parentNode.removeChild(this.overlayElement);
+                }
+            },
+            watch: {
+                // 监听遮罩显示状态变化
+                showGlobalOverlay(newVal) {
+                    this.updateOverlayVisibility(newVal || this.processing);
+                },
+                processing(newVal) {
+                    this.updateOverlayVisibility(newVal || this.showGlobalOverlay);
+                }
+            },
+            methods: {
+                createOverlayElement() {
+                    // 创建遮罩DOM元素
+                    this.overlayElement = document.createElement('div');
+                    this.overlayElement.className = 'global-overlay';
+                    
+                    // 添加遮罩内容
+                    this.overlayElement.innerHTML = `
+                        <div class="spinner"></div>
+                        <div class="status-text">${this.statusText}</div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${this.progressPercentage}%"></div>
+                        </div>
+                        <div class="status-detail">${this.statusDetail}</div>
+                        <button class="close-overlay-btn el-button el-button--primary" style="display: none;">关闭遮罩</button>
+                    `;
+                    
+                    // 添加到body
+                    document.body.appendChild(this.overlayElement);
+                    
+                    // 添加关闭按钮事件监听
+                    const closeBtn = this.overlayElement.querySelector('.close-overlay-btn');
+                    closeBtn.addEventListener('click', () => {
+                        this.showGlobalOverlay = false;
+                    });
+                    
+                    // 初始隐藏遮罩
+                    this.updateOverlayVisibility(false);
+                },
+                updateOverlayVisibility(show) {
+                    if (!this.overlayElement) return;
+                    
+                    const closeBtn = this.overlayElement.querySelector('.close-overlay-btn');
+                    
+                    if (show) {
+                        this.overlayElement.classList.add('active');
+                        
+                        // 更新遮罩内容
+                        this.updateOverlayContent();
+                        
+                        // 如果是手动显示的遮罩，显示关闭按钮
+                        if (this.showGlobalOverlay && !this.processing) {
+                            closeBtn.style.display = 'block';
+                        } else {
+                            closeBtn.style.display = 'none';
+                        }
+                    } else {
+                        this.overlayElement.classList.remove('active');
+                    }
+                },
+                updateOverlayContent() {
+                    if (!this.overlayElement) return;
+                    
+                    const statusText = this.overlayElement.querySelector('.status-text');
+                    const statusDetail = this.overlayElement.querySelector('.status-detail');
+                    const progressBar = this.overlayElement.querySelector('.progress-bar');
+                    
+                    if (statusText) statusText.textContent = this.statusText;
+                    if (statusDetail) statusDetail.textContent = this.statusDetail;
+                    if (progressBar) progressBar.style.width = `${this.progressPercentage}%`;
+                },
+                handleClose(done) {
+                    if (this.processing) {
+                        this.$message.warning('当前操作正在进行中，请等待完成');
+                        return;
+                    }
+                    done();
+                },
+                handleAction(action) {
+                    this.currentAction = action;
+                    this.processing = true;
+                    this.progressPercentage = 0;
+                    
+                    // 根据不同的操作设置不同的状态文本
+                    const actionTexts = {
+                        'upload': {
+                            text: '文件上传中...',
+                            detail: '正在上传文件到服务器，请勿关闭窗口'
+                        },
+                        'process': {
+                            text: '数据处理中...',
+                            detail: '正在分析数据并生成报告，这可能需要一些时间'
+                        },
+                        'save': {
+                            text: '保存结果中...',
+                            detail: '正在将处理结果保存到数据库'
+                        }
+                    };
+                    
+                    this.statusText = actionTexts[action].text;
+                    this.statusDetail = actionTexts[action].detail;
+                    this.updateOverlayContent();
+                    
+                    // 模拟处理过程
+                    const interval = setInterval(() => {
+                        this.progressPercentage += Math.random() * 15;
+                        if (this.progressPercentage >= 100) {
+                            this.progressPercentage = 100;
+                            clearInterval(interval);
+                            
+                            // 处理完成
+                            setTimeout(() => {
+                                this.statusText = '操作完成！';
+                                this.statusDetail = `${actionTexts[action].text.replace('中...', '')}成功完成`;
+                                this.updateOverlayContent();
+                                
+                                setTimeout(() => {
+                                    this.processing = false;
+                                    this.statusText = '处理中...';
+                                    this.statusDetail = '请等待当前操作完成';
+                                    this.progressPercentage = 0;
+                                    this.updateOverlayContent();
+                                    
+                                    // 显示成功消息
+                                    this.$message({
+                                        message: `${actionTexts[action].text.replace('中...', '')}成功完成`,
+                                        type: 'success'
+                                    });
+                                }, 1500);
+                            }, 300);
+                        } else {
+                            this.updateOverlayContent();
+                        }
+                    }, 200);
+                },
+                simulateQuickOperations() {
+                    this.dialogVisible = true;
+                    
+                    // 等待对话框打开
+                    setTimeout(() => {
+                        const operations = ['upload', 'process', 'save'];
+                        let index = 0;
+                        
+                        const runNextOperation = () => {
+                            if (index < operations.length) {
+                                this.handleAction(operations[index]);
+                                
+                                // 在操作完成后运行下一个
+                                const checkCompletion = setInterval(() => {
+                                    if (!this.processing) {
+                                        clearInterval(checkCompletion);
+                                        index++;
+                                        setTimeout(runNextOperation, 1000);
+                                    }
+                                }, 100);
+                            }
+                        };
+                        
+                        runNextOperation();
+                    }, 300);
+                },
+                toggleGlobalOverlay() {
+                    this.showGlobalOverlay = !this.showGlobalOverlay;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

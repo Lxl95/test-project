@@ -394,7 +394,25 @@ const routes = [
       name: 'EngDetail',
       title: '报表总览'
     }
-  }
+  },
+  {
+    path: '/RqDetailAPP',
+    name: 'RqDetailAPP',
+    component: () => import('../views/工程详情/RqDetailAPP.vue'),
+    meta: {
+      name: 'RqDetail',
+      title: '燃气工程详情APP'
+    }
+  },
+  {
+    path: '/CodePrint',
+    name: 'CodePrint',
+    component: () => import('../views/弹框分步骤打印编码/CodePrint.vue'),
+    meta: {
+      name: 'CodePrint',
+      title: '弹框分步骤打印'
+    }
+  },
 ];
 
 const router = new VueRouter({

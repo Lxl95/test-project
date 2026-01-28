@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表访问量统计总览 - 水务报表平台</title>
+    <!-- Element Plus CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <!-- ECharts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.3.0/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #303133;
+        }
+        
+        .dashboard-container {
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* 头部区域 */
+        .dashboard-header {
+            margin-bottom: 20px;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 10px;
+        }
+        
+        .header-subtitle {
+            font-size: 14px;
+            color: #909399;
+        }
+        
+        /* 统计卡片样式 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .stat-icon i {
+            font-size: 24px;
+            color: white;
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: #909399;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+        
+        .stat-compare {
+            font-size: 12px;
+            color: #909399;
+        }
+        
+        .compare-up {
+            color: #67c23a;
+        }
+        
+        .compare-down {
+            color: #f56c6c;
+        }
+        
+        /* 图表区域 */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .chart-container {
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* 表格区域 */
+        .table-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* 水司列表样式 */
+        .company-list {
+            margin-top: 20px;
+        }
+        
+        .company-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #ebeef5;
+        }
+        
+        .company-item:last-child {
+            border-bottom: none;
+        }
+        
+        .company-rank {
+            width: 40px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: #409eff;
+        }
+        
+        .company-rank.top-3 {
+            color: #f56c6c;
+        }
+        
+        .company-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+        
+        .company-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .company-stats {
+            font-size: 12px;
+            color: #909399;
+        }
+        
+        .company-access {
+            font-weight: 600;
+            color: #409eff;
+        }
+        
+        /* 时间筛选器 */
+        .time-filter {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .time-btn {
+            padding: 8px 16px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .time-btn:hover {
+            border-color: #409eff;
+            color: #409eff;
+        }
+        
+        .time-btn.active {
+            background: #409eff;
+            color: white;
+            border-color: #409eff;
+        }
+        
+        /* 顶部操作栏 */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .refresh-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            border-color: #409eff;
+            color: #409eff;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-controls {
+                width: 100%;
+            }
+            
+            .top-actions {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            color: #909399;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #409eff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 头部标题 -->
+        <div class="dashboard-header">
+            <h1 class="header-title">报表统计总览</h1>
+            <div class="header-subtitle">实时监控报表平台使用情况，分析用户行为，优化报表服务</div>
+        </div>
+        
+        <!-- 时间筛选 -->
+        <div class="time-filter fade-in">
+            <div class="filter-row">
+                <div class="filter-label">时间范围：</div>
+                <div class="filter-controls">
+                    <button class="time-btn active" data-range="today">今日</button>
+                    <button class="time-btn" data-range="yesterday">昨日</button>
+                    <button class="time-btn" data-range="week">本周</button>
+                    <button class="time-btn" data-range="month">本月</button>
+                    <button class="time-btn" data-range="quarter">本季度</button>
+                    <button class="time-btn" data-range="year">本年</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 顶部操作栏 -->
+        <div class="top-actions fade-in">
+            <div class="action-buttons">
+                <button class="refresh-btn" id="refreshBtn">
+                    <span class="refresh-icon">↻</span> 刷新数据
+                </button>
+                <button class="time-btn" id="exportBtn">导出报告</button>
+            </div>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+        
+        <!-- 统计卡片 -->
+        <div class="stats-grid fade-in">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #409EFF, #66b1ff);">
+                        <i>📊</i>
+                    </div>
+                    <div>
+                        <div class="stat-title">总访问量</div>
+                        <div class="stat-value" id="totalAccess">12,458</div>
+                        <div class="stat-compare">
+                            <span class="compare-up">↑ 12.5%</span> 较昨日
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #67C23A, #85ce61);">
+                        <i>👥</i>
+                    </div>
+                    <div>
+                        <div class="stat-title">活跃用户</div>
+                        <div class="stat-value" id="activeUsers">328</div>
+                        <div class="stat-compare">
+                            今日活跃人数
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #E6A23C, #ebb563);">
+                        <i>📋</i>
+                    </div>
+                    <div>
+                        <div class="stat-title">报表总数</div>
+                        <div class="stat-value" id="totalReports">156</div>
+                        <div class="stat-compare">
+                            <span class="compare-up">+8</span> 本月新增
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #F56C6C, #f78989);">
+                        <i>🏢</i>
+                    </div>
+                    <div>
+                        <div class="stat-title">活跃水司</div>
+                        <div class="stat-value" id="activeCompanies">24</div>
+                        <div class="stat-compare">
+                            今日有访问的水司数
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图表区域 -->
+        <div class="charts-section fade-in">
+            <!-- 访问趋势图 -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">访问量趋势</div>
+                    <div class="filter-controls">
+                        <button class="time-btn active" data-trend="hours">12小时</button>
+                        <button class="time-btn" data-trend="days">7天</button>
+                        <button class="time-btn" data-trend="weeks">4周</button>
+                    </div>
+                </div>
+                <div class="chart-container" id="accessTrendChart"></div>
+            </div>
+            
+            <!-- 报表类型分布 -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">报表类型分布</div>
+                </div>
+                <div class="chart-container" id="reportTypeChart"></div>
+            </div>
+            
+            <!-- 活跃水司分布 -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">活跃水司分布</div>
+                </div>
+                <div class="chart-container" id="companyDistributionChart"></div>
+            </div>
+            
+            <!-- 热门报表排行 -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">热门报表排行</div>
+                </div>
+                <div class="chart-container" id="hotReportChart"></div>
+            </div>
+        </div>
+        
+        <!-- 表格区域 -->
+        <div class="fade-in">
+            <div class="table-card">
+                <div class="table-header">
+                    <div class="table-title">水司使用排行</div>
+                    <button class="time-btn" id="viewAllCompanies">查看全部</button>
+                </div>
+                
+                <div class="company-list" id="companyRanking">
+                    <!-- 水司排行将通过JavaScript动态生成 -->
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        加载中...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let accessTrendChart;
+        let reportTypeChart;
+        let companyDistributionChart;
+        let hotReportChart;
+        
+        // 初始化函数
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化图表
+            initCharts();
+            
+            // 加载数据
+            loadDashboardData();
+            
+            // 设置当前时间
+            updateCurrentTime();
+            
+            // 设置事件监听器
+            setupEventListeners();
+            
+            // 自动刷新
+            setInterval(loadDashboardData, 60000); // 每分钟刷新一次
+            setInterval(updateCurrentTime, 1000); // 每秒更新时间
+        });
+        
+        // 初始化图表
+        function initCharts() {
+            // 访问趋势图
+            accessTrendChart = echarts.init(document.getElementById('accessTrendChart'));
+            
+            // 报表类型分布图
+            reportTypeChart = echarts.init(document.getElementById('reportTypeChart'));
+            
+            // 活跃水司分布图
+            companyDistributionChart = echarts.init(document.getElementById('companyDistributionChart'));
+            
+            // 热门报表排行图
+            hotReportChart = echarts.init(document.getElementById('hotReportChart'));
+        }
+        
+        // 加载仪表板数据
+        function loadDashboardData() {
+            // 模拟API调用 - 实际使用时替换为真实API
+            simulateAPICalls();
+        }
+        
+        // 模拟API调用
+        function simulateAPICalls() {
+            // 模拟加载状态
+            document.getElementById('companyRanking').innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    加载中...
+                </div>
+            `;
+            
+            // 模拟延迟
+            setTimeout(() => {
+                // 更新统计卡片
+                updateStatsCards();
+                
+                // 渲染访问趋势图
+                renderAccessTrendChart();
+                
+                // 渲染报表类型分布图
+                renderReportTypeChart();
+                
+                // 渲染活跃水司分布图
+                renderCompanyDistributionChart();
+                
+                // 渲染热门报表排行图
+                renderHotReportChart();
+                
+                // 渲染水司排行
+                renderCompanyRanking();
+                
+                // 移除加载状态
+                document.getElementById('companyRanking').innerHTML = '';
+                renderCompanyRanking();
+            }, 800);
+        }
+        
+        // 更新统计卡片
+        function updateStatsCards() {
+            // 模拟数据 - 实际使用时从API获取
+            const statsData = {
+                totalAccess: Math.floor(Math.random() * 5000) + 10000,
+                activeUsers: Math.floor(Math.random() * 200) + 200,
+                totalReports: Math.floor(Math.random() * 50) + 120,
+                activeCompanies: Math.floor(Math.random() * 10) + 20
+            };
+            
+            document.getElementById('totalAccess').textContent = formatNumber(statsData.totalAccess);
+            document.getElementById('activeUsers').textContent = formatNumber(statsData.activeUsers);
+            document.getElementById('totalReports').textContent = formatNumber(statsData.totalReports);
+            document.getElementById('activeCompanies').textContent = formatNumber(statsData.activeCompanies);
+        }
+        
+        // 渲染访问趋势图
+        function renderAccessTrendChart() {
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderColor: '#ccc',
+                    borderWidth: 1,
+                    textStyle: {
+                        color: '#333'
+                    },
+                    formatter: function(params) {
+                        let result = `<div style="margin-bottom: 5px; font-weight: bold;">${params[0].axisValue}</div>`;
+                        params.forEach(item => {
+                            const icon = item.seriesName === '访问量' ? '📈' : '👤';
+                            result += `
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin: 5px 0;">
+                                    <span>${icon} ${item.seriesName}</span>
+                                    <span style="font-weight: bold; color: ${item.color}">${formatNumber(item.value)}</span>
+                                </div>
+                            `;
+                        });
+                        return result;
+                    }
+                },
+                legend: {
+                    data: ['访问量', '用户数'],
+                    top: 10
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: function(value) {
+                            if (value >= 1000) {
+                                return (value / 1000) + 'k';
+                            }
+                            return value;
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '访问量',
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: {
+                            width: 3,
+                            color: '#409EFF'
+                        },
+                        itemStyle: {
+                            color: '#409EFF'
+                        },
+                        areaStyle: {
+                            opacity: 0.3,
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(64, 158, 255, 0.6)' },
+                                { offset: 1, color: 'rgba(64, 158, 255, 0.1)' }
+                            ])
+                        },
+                        data: [120, 85, 65, 105, 220, 350, 420, 380, 310, 280, 190, 150]
+                    },
+                    {
+                        name: '用户数',
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: {
+                            width: 3,
+                            color: '#67C23A'
+                        },
+                        itemStyle: {
+                            color: '#67C23A'
+                        },
+                        areaStyle: {
+                            opacity: 0.3,
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(103, 194, 58, 0.6)' },
+                                { offset: 1, color: 'rgba(103, 194, 58, 0.1)' }
+                            ])
+                        },
+                        data: [45, 32, 28, 42, 85, 120, 145, 130, 110, 95, 75, 60]
+                    }
+                ]
+            };
+            
+            accessTrendChart.setOption(option);
+        }
+        
+        // 渲染报表类型分布图
+        function renderReportTypeChart() {
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    itemWidth: 12,
+                    itemHeight: 12,
+                    textStyle: {
+                        fontSize: 12
+                    }
+                },
+                series: [
+                    {
+                        name: '报表类型',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        center: ['35%', '50%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 6,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 16,
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: [
+                            { value: 45, name: '日报表', itemStyle: { color: '#409EFF' } },
+                            { value: 32, name: '月报表', itemStyle: { color: '#67C23A' } },
+                            { value: 28, name: '统计报表', itemStyle: { color: '#E6A23C' } },
+                            { value: 24, name: '分析报表', itemStyle: { color: '#F56C6C' } },
+                            { value: 18, name: '其他报表', itemStyle: { color: '#909399' } }
+                        ]
+                    }
+                ]
+            };
+            
+            reportTypeChart.setOption(option);
+        }
+        
+        // 渲染活跃水司分布图
+        function renderCompanyDistributionChart() {
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: function(value) {
+                            return value;
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['北京水司', '上海水司', '广州水司', '深圳水司', '杭州水司', '南京水司', '武汉水司', '成都水司']
+                },
+                series: [
+                    {
+                        name: '访问量',
+                        type: 'bar',
+                        barWidth: '60%',
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                { offset: 0, color: '#83bff6' },
+                                { offset: 0.5, color: '#188df0' },
+                                { offset: 1, color: '#188df0' }
+                            ])
+                        },
+                        label: {
+                            show: true,
+                            position: 'right'
+                        },
+                        data: [335, 310, 234, 235, 154, 145, 120, 110]
+                    }
+                ]
+            };
+            
+            companyDistributionChart.setOption(option);
+        }
+        
+        // 渲染热门报表排行图
+        function renderHotReportChart() {
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: function(value) {
+                            return value;
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['水质日报表', '水量月报表', '营收统计表', '用户分析表', '设备监控表', '故障统计表', '绩效分析表', '成本分析表']
+                },
+                series: [
+                    {
+                        name: '访问次数',
+                        type: 'bar',
+                        barWidth: '60%',
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                { offset: 0, color: '#f78989' },
+                                { offset: 0.5, color: '#f56c6c' },
+                                { offset: 1, color: '#f56c6c' }
+                            ])
+                        },
+                        label: {
+                            show: true,
+                            position: 'right'
+                        },
+                        data: [420, 380, 350, 310, 280, 220, 190, 150]
+                    }
+                ]
+            };
+            
+            hotReportChart.setOption(option);
+        }
+        
+        // 渲染水司排行
+        function renderCompanyRanking() {
+            const companies = [
+                { name: '北京水司', access: 335, users: 45, reports: 28 },
+                { name: '上海水司', access: 310, users: 42, reports: 25 },
+                { name: '广州水司', access: 234, users: 38, reports: 22 },
+                { name: '深圳水司', access: 235, users: 35, reports: 20 },
+                { name: '杭州水司', access: 154, users: 28, reports: 18 }
+            ];
+            
+            let html = '';
+            companies.forEach((company, index) => {
+                const rankClass = index < 3 ? 'top-3' : '';
+                html += `
+                    <div class="company-item">
+                        <div class="company-rank ${rankClass}">${index + 1}</div>
+                        <div class="company-info">
+                            <div class="company-name">${company.name}</div>
+                            <div class="company-stats">
+                                <span class="company-access">${company.access}次访问</span> · 
+                                ${company.users}个用户 · 
+                                ${company.reports}个报表
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('companyRanking').innerHTML = html;
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 时间范围按钮
+            document.querySelectorAll('.time-btn[data-range]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有active类
+                    document.querySelectorAll('.time-btn[data-range]').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    // 给当前按钮添加active类
+                    this.classList.add('active');
+                    
+                    // 获取时间范围
+                    const range = this.getAttribute('data-range');
+                    
+                    // 根据时间范围重新加载数据
+                    loadDataByRange(range);
+                });
+            });
+            
+            // 访问趋势按钮
+            document.querySelectorAll('.time-btn[data-trend]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有active类
+                    document.querySelectorAll('.time-btn[data-trend]').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    // 给当前按钮添加active类
+                    this.classList.add('active');
+                    
+                    // 获取趋势类型
+                    const trend = this.getAttribute('data-trend');
+                    
+                    // 根据趋势类型更新图表
+                    updateTrendChart(trend);
+                });
+            });
+            
+            // 刷新按钮
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                // 添加旋转动画
+                const icon = this.querySelector('.refresh-icon');
+                icon.style.transform = 'rotate(360deg)';
+                icon.style.transition = 'transform 0.5s ease';
+                
+                // 重新加载数据
+                loadDashboardData();
+                
+                // 重置旋转
+                setTimeout(() => {
+                    icon.style.transform = 'rotate(0deg)';
+                }, 500);
+            });
+            
+            // 导出按钮
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                alert('导出功能正在开发中...');
+            });
+            
+            // 查看全部水司按钮
+            document.getElementById('viewAllCompanies').addEventListener('click', function() {
+                alert('跳转到水司使用详情页面...');
+            });
+            
+            // 窗口大小变化时重新调整图表
+            window.addEventListener('resize', function() {
+                accessTrendChart.resize();
+                reportTypeChart.resize();
+                companyDistributionChart.resize();
+                hotReportChart.resize();
+            });
+        }
+        
+        // 根据时间范围加载数据
+        function loadDataByRange(range) {
+            // 模拟数据加载
+            console.log(`加载 ${range} 的数据`);
+            
+            // 这里可以调用不同的API接口获取对应时间范围的数据
+            // 实际使用时替换为真实的API调用
+            
+            // 重新加载数据
+            loadDashboardData();
+        }
+        
+        // 更新趋势图表
+        function updateTrendChart(trend) {
+            // 根据趋势类型更新图表数据
+            console.log(`更新趋势图表: ${trend}`);
+            
+            // 这里可以根据趋势类型重新渲染图表
+            // 实际使用时调用不同的数据接口
+            
+            // 重新渲染访问趋势图
+            renderAccessTrendChart();
+        }
+        
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            document.getElementById('currentTime').textContent = `更新时间: ${timeString}`;
+        }
+        
+        // 格式化数字（添加千位分隔符）
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+    </script>
+</body>
+</html>

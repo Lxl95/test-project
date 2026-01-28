@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打印方向问题解决方案</title>
+    <style>
+        /* 通用样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .content {
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9f7fe;
+            border-radius: 5px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        /* 打印样式 */
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            
+            .controls {
+                display: none;
+            }
+            
+            /* 横向打印样式 */
+            @page {
+                size: landscape;
+                margin: 1cm;
+            }
+            
+            /* 纵向打印时的特殊处理 */
+            @page :portrait {
+                size: portrait;
+                margin: 1.5cm;
+            }
+            
+            /* 在纵向打印时调整表格和内容 */
+            @media (orientation: portrait) {
+                .content {
+                    max-width: 100%;
+                    overflow: hidden;
+                }
+                
+                table {
+                    font-size: 12px;
+                }
+                
+                th, td {
+                    padding: 5px;
+                }
+                
+                /* 如果表格太宽，强制换行 */
+                td {
+                    word-break: break-word;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>打印方向问题解决方案</h1>
+        
+        <div class="controls">
+            <p>此区域在打印时不会显示</p>
+            <button onclick="window.print()">打印页面</button>
+            <button onclick="showPrintTips()">打印提示</button>
+        </div>
+        
+        <div class="content">
+            <h2>示例内容</h2>
+            <p>这是一个在横向打印时正常，但纵向打印时可能超出边界的示例页面。</p>
+            
+            <h3>数据表格</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>产品名称</th>
+                        <th>描述</th>
+                        <th>价格</th>
+                        <th>库存数量</th>
+                        <th>供应商</th>
+                        <th>类别</th>
+                        <th>创建日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>001</td>
+                        <td>笔记本电脑</td>
+                        <td>高性能笔记本电脑，适合办公和游戏</td>
+                        <td>¥8,999</td>
+                        <td>50</td>
+                        <td>ABC科技有限公司</td>
+                        <td>电子产品</td>
+                        <td>2023-05-15</td>
+                    </tr>
+                    <tr>
+                        <td>002</td>
+                        <td>无线鼠标</td>
+                        <td>2.4GHz无线连接，人体工学设计</td>
+                        <td>¥199</td>
+                        <td>120</td>
+                        <td>XYZ电子有限公司</td>
+                        <td>电脑配件</td>
+                        <td>2023-06-20</td>
+                    </tr>
+                    <tr>
+                        <td>003</td>
+                        <td>机械键盘</td>
+                        <td>RGB背光，青轴机械键盘，全键无冲</td>
+                        <td>¥599</td>
+                        <td>75</td>
+                        <td>DEF科技公司</td>
+                        <td>电脑配件</td>
+                        <td>2023-07-10</td>
+                    </tr>
+                    <tr>
+                        <td>004</td>
+                        <td>27英寸显示器</td>
+                        <td>2K分辨率IPS面板，支持HDR，窄边框设计</td>
+                        <td>¥2,299</td>
+                        <td>30</td>
+                        <td>GHI电子集团</td>
+                        <td>显示器</td>
+                        <td>2023-08-05</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>解决方案说明</h3>
+            <p>通过CSS媒体查询，我们可以针对不同的打印方向设置不同的样式：</p>
+            <ul>
+                <li>使用 <code>@page</code> 规则设置页面方向</li>
+                <li>使用 <code>@media (orientation: portrait)</code> 针对纵向打印进行优化</li>
+                <li>在纵向打印时调整字体大小、边距和表格布局</li>
+                <li>使用 <code>word-break: break-word</code> 确保长文本不会溢出</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function showPrintTips() {
+            alert("打印提示：\n\n1. 在打印对话框中，可以选择横向或纵向打印\n2. 纵向打印时，表格内容会自动调整以适应页面宽度\n3. 使用Chrome浏览器可以获得最佳的打印效果\n4. 打印前可以使用打印预览功能检查布局");
+        }
+    </script>
+</body>
+</html>
