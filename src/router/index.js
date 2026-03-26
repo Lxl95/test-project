@@ -405,6 +405,33 @@ const routes = [
     }
   },
   {
+    path: '/QrCode',
+    name: 'QrCode',
+    component: () => import('../views/工程详情/QrCode.vue'),
+    meta: {
+      name: 'QrCode',
+      title: '二维码带logo'
+    }
+  },
+  {
+    path: '/LogAPP',
+    name: 'LogAPP',
+    component: () => import('../views/工程详情/LogAPP2.vue'),
+    meta: {
+      name: 'LogAPP',
+      title: '日志（APP）'
+    }
+  },
+  {
+    path: '/BpmSvg',
+    name: 'BpmSvg',
+    component: () => import('../views/工程详情/BpmSvgIndex.vue'),
+    meta: {
+      name: 'BpmSvg',
+      title: 'SVG流程图'
+    }
+  },
+  {
     path: '/CodePrint',
     name: 'CodePrint',
     component: () => import('../views/弹框分步骤打印编码/CodePrint.vue'),
