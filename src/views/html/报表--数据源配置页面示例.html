@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态表格配置</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a6dcc 0%, #3a8de0 100%);
+            color: white;
+            padding: 22px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header h1 i {
+            font-size: 26px;
+        }
+        
+        .content-tabs {
+            display: flex;
+            border-bottom: 1px solid #e1e5eb;
+            background-color: #f8fafc;
+        }
+        
+        .tab-btn {
+            padding: 16px 28px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            color: #1a6dcc;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #1a6dcc;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 650px;
+        }
+        
+        .config-panel {
+            width: 400px;
+            padding: 30px;
+            border-right: 1px solid #e1e5eb;
+            background-color: #fafbfd;
+        }
+        
+        .result-panel {
+            flex: 1;
+            padding: 30px;
+            background-color: #f8fafc;
+        }
+        
+        .config-section {
+            margin-bottom: 30px;
+        }
+        
+        .config-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eaeef2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .config-title i {
+            color: #1a6dcc;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .radio-option input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #d0d7e2;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1a6dcc;
+            box-shadow: 0 0 0 3px rgba(26, 109, 204, 0.1);
+        }
+        
+        .select-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .select-group select {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #d0d7e2;
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: white;
+            cursor: pointer;
+        }
+        
+        .switch-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 26px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #1a6dcc;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 13px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background-color: #1a6dcc;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #155ba8;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #0da271;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .result-area {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            height: 480px;
+            overflow: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        
+        .result-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+        }
+        
+        .result-placeholder i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .result-placeholder p {
+            font-size: 16px;
+        }
+        
+        .database-query {
+            background-color: #1e293b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        
+        .query-label {
+            color: #94a3b8;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .query-code {
+            color: #63b3ed;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .api-tab, .database-tab {
+            display: none;
+        }
+        
+        .api-tab.active, .database-tab.active {
+            display: block;
+        }
+        
+        .database-only {
+            display: none;
+        }
+        
+        .database-tab.active .database-only {
+            display: block;
+        }
+        
+        .footer {
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #e1e5eb;
+            background-color: #f8fafc;
+        }
+        
+        @media (max-width: 1100px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .config-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e1e5eb;
+            }
+            
+            .result-panel {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 18px 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .config-panel, .result-panel {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1><i class="fas fa-table"></i> 动态表格配置</h1>
+            <div class="status">就绪</div>
+        </div>
+        
+        <!-- 标签页 -->
+        <div class="content-tabs">
+            <button class="tab-btn active" data-tab="api">API 配置</button>
+            <button class="tab-btn" data-tab="database">数据库配置</button>
+        </div>
+        
+        <!-- API配置内容 -->
+        <div class="api-tab active">
+            <div class="main-content">
+                <!-- 配置面板 -->
+                <div class="config-panel">
+                    <div class="config-section">
+                        <h3 class="config-title"><i class="fas fa-cog"></i> 基本配置</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">数据类型</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="data-type" value="api" checked>
+                                    <span>API</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="data-type" value="database">
+                                    <span>数据库</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">接口地址</label>
+                            <input type="text" class="form-input" placeholder="请输入API接口地址" value="https://api.example.com/data">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">请求方式</label>
+                            <div class="select-group">
+                                <select>
+                                    <option value="get" selected>GET</option>
+                                    <option value="post">POST</option>
+                                    <option value="put">PUT</option>
+                                    <option value="delete">DELETE</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">请求参数</label>
+                            <textarea class="form-input" rows="4" placeholder="请输入请求参数，JSON格式">{
+  "page": 1,
+  "pageSize": 20,
+  "sortBy": "id"
+}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">数据过滤</label>
+                            <div class="switch-group">
+                                <span>启用过滤规则</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="test-api">
+                            <i class="fas fa-play-circle"></i> 测试
+                        </button>
+                        <button class="btn btn-success" id="sync-header">
+                            <i class="fas fa-sync-alt"></i> 同步表头
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 结果面板 -->
+                <div class="result-panel">
+                    <div class="result-header">
+                        <h3 class="result-title">测试结果</h3>
+                        <div class="result-info">
+                            <span id="result-status">等待测试</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-area" id="api-result">
+                        <div class="result-placeholder">
+                            <i class="fas fa-code"></i>
+                            <p>请点击"测试"按钮查看结果</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 数据库配置内容 -->
+        <div class="database-tab">
+            <div class="main-content">
+                <!-- 配置面板 -->
+                <div class="config-panel">
+                    <div class="config-section">
+                        <h3 class="config-title"><i class="fas fa-database"></i> 数据库配置</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">数据类型</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="data-type-db" value="api">
+                                    <span>API</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="data-type-db" value="database" checked>
+                                    <span>数据库</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">数据库</label>
+                            <div class="select-group">
+                                <select id="database-select">
+                                    <option value="报装" selected>报装</option>
+                                    <option value="一体化">一体化</option>
+                                    <option value="营收">营收</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group database-only">
+                            <label class="form-label">存储过程</label>
+                            <div class="switch-group">
+                                <span>启用存储过程</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="stored-procedure">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">查询语句</label>
+                            <textarea class="form-input" rows="6" id="sql-query">select * from v_bz_rp_project where PROJECT_CODE like #{code} and PROJECT_CODE like '%2024%' order by CREATE_TIME desc</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="test-db">
+                            <i class="fas fa-play-circle"></i> 测试
+                        </button>
+                        <button class="btn btn-success" id="sync-header-db">
+                            <i class="fas fa-sync-alt"></i> 同步表头
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 结果面板 -->
+                <div class="result-panel">
+                    <div class="result-header">
+                        <h3 class="result-title">测试结果</h3>
+                        <div class="result-info">
+                            <span id="result-status-db">等待测试</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-area" id="db-result">
+                        <div class="result-placeholder">
+                            <i class="fas fa-database"></i>
+                            <p>请点击"测试"按钮查看结果</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>动态表格配置系统 &copy; 2023 - 提供简洁高效的数据接口配置方案</p>
+        </div>
+    </div>
+
+    <script>
+        // 标签页切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const apiTab = document.querySelector('.api-tab');
+            const databaseTab = document.querySelector('.database-tab');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    // 添加当前按钮的active类
+                    this.classList.add('active');
+                    
+                    // 获取要显示的标签
+                    const tabToShow = this.getAttribute('data-tab');
+                    
+                    // 隐藏所有标签内容
+                    apiTab.classList.remove('active');
+                    databaseTab.classList.remove('active');
+                    
+                    // 显示当前标签内容
+                    document.querySelector(`.${tabToShow}-tab`).classList.add('active');
+                });
+            });
+            
+            // API测试按钮点击事件
+            const testApiBtn = document.getElementById('test-api');
+            const apiResultArea = document.getElementById('api-result');
+            const resultStatus = document.getElementById('result-status');
+            
+            testApiBtn.addEventListener('click', function() {
+                resultStatus.textContent = '测试中...';
+                resultStatus.style.color = '#f59e0b';
+                
+                // 模拟API请求
+                setTimeout(() => {
+                    resultStatus.textContent = '测试成功';
+                    resultStatus.style.color = '#10b981';
+                    
+                    // 显示模拟的API响应数据
+                    apiResultArea.innerHTML = `
+                        <div style="color: #10b981; margin-bottom: 15px;">
+                            <i class="fas fa-check-circle"></i> 接口测试成功 (200 OK)
+                        </div>
+                        <div style="color: #94a3b8; margin-bottom: 10px;">响应时间: 156ms</div>
+                        <div style="margin-top: 20px; margin-bottom: 10px; color: #e2e8f0;">返回数据示例:</div>
+                        <div style="color: #63b3ed;">
+                            {
+                              "code": 200,
+                              "message": "success",
+                              "data": {
+                                "total": 125,
+                                "page": 1,
+                                "pageSize": 20,
+                                "list": [
+                                  {
+                                    "id": 1001,
+                                    "projectCode": "PRO2024001",
+                                    "projectName": "阳光小区报装项目",
+                                    "status": "进行中",
+                                    "createTime": "2024-03-15 10:30:00"
+                                  },
+                                  {
+                                    "id": 1002,
+                                    "projectCode": "PRO2024002",
+                                    "projectName": "明湖花园报装项目",
+                                    "status": "已完成",
+                                    "createTime": "2024-03-14 14:20:00"
+                                  },
+                                  {
+                                    "id": 1003,
+                                    "projectCode": "PRO2024003",
+                                    "projectName": "新城大厦报装项目",
+                                    "status": "审核中",
+                                    "createTime": "2024-03-13 09:15:00"
+                                  }
+                                ]
+                              }
+                            }
+                        </div>
+                        <div style="margin-top: 20px; color: #94a3b8;">
+                            共3条示例数据，实际数据共125条
+                        </div>
+                    `;
+                }, 800);
+            });
+            
+            // 数据库测试按钮点击事件
+            const testDbBtn = document.getElementById('test-db');
+            const dbResultArea = document.getElementById('db-result');
+            const resultStatusDb = document.getElementById('result-status-db');
+            const databaseSelect = document.getElementById('database-select');
+            const sqlQuery = document.getElementById('sql-query');
+            
+            testDbBtn.addEventListener('click', function() {
+                resultStatusDb.textContent = '测试中...';
+                resultStatusDb.style.color = '#f59e0b';
+                
+                const selectedDb = databaseSelect.value;
+                const query = sqlQuery.value;
+                
+                // 模拟数据库查询
+                setTimeout(() => {
+                    resultStatusDb.textContent = '测试成功';
+                    resultStatusDb.style.color = '#10b981';
+                    
+                    // 显示模拟的数据库查询结果
+                    dbResultArea.innerHTML = `
+                        <div style="color: #10b981; margin-bottom: 15px;">
+                            <i class="fas fa-check-circle"></i> 数据库连接成功，查询执行完毕
+                        </div>
+                        <div style="color: #94a3b8; margin-bottom: 10px;">数据库: ${selectedDb}</div>
+                        <div style="color: #94a3b8; margin-bottom: 10px;">查询时间: 234ms</div>
+                        
+                        <div class="database-query">
+                            <div class="query-label">执行的SQL:</div>
+                            <div class="query-code">${query}</div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; margin-bottom: 10px; color: #e2e8f0;">查询结果示例:</div>
+                        <div style="color: #63b3ed;">
+                            [
+                              {
+                                "PROJECT_ID": 1001,
+                                "PROJECT_CODE": "BZ20240001",
+                                "PROJECT_NAME": "阳光小区报装项目",
+                                "CUSTOMER_NAME": "张三",
+                                "ADDRESS": "阳光路1号",
+                                "STATUS": "进行中",
+                                "CREATE_TIME": "2024-03-15 10:30:00"
+                              },
+                              {
+                                "PROJECT_ID": 1002,
+                                "PROJECT_CODE": "BZ20240002",
+                                "PROJECT_NAME": "明湖花园报装项目",
+                                "CUSTOMER_NAME": "李四",
+                                "ADDRESS": "明湖路28号",
+                                "STATUS": "已完成",
+                                "CREATE_TIME": "2024-03-14 14:20:00"
+                              },
+                              {
+                                "PROJECT_ID": 1003,
+                                "PROJECT_CODE": "BZ20240003",
+                                "PROJECT_NAME": "新城大厦报装项目",
+                                "CUSTOMER_NAME": "王五",
+                                "ADDRESS": "新城路101号",
+                                "STATUS": "审核中",
+                                "CREATE_TIME": "2024-03-13 09:15:00"
+                              }
+                            ]
+                        </div>
+                        <div style="margin-top: 20px; color: #94a3b8;">
+                            共3条示例数据，实际查询到8条记录
+                        </div>
+                    `;
+                }, 1000);
+            });
+            
+            // 同步表头按钮点击事件
+            const syncButtons = document.querySelectorAll('#sync-header, #sync-header-db');
+            
+            syncButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const isApiTab = this.id === 'sync-header';
+                    const statusElement = isApiTab ? resultStatus : resultStatusDb;
+                    
+                    statusElement.textContent = '同步中...';
+                    statusElement.style.color = '#3b82f6';
+                    
+                    // 模拟同步操作
+                    setTimeout(() => {
+                        statusElement.textContent = '同步成功';
+                        statusElement.style.color = '#10b981';
+                        
+                        // 显示提示信息
+                        alert('表头数据同步成功！已更新表格列定义。');
+                    }, 600);
+                });
+            });
+            
+            // 数据库选择变化事件
+            databaseSelect.addEventListener('change', function() {
+                const dbName = this.value;
+                const sqlTextarea = document.getElementById('sql-query');
+                
+                // 根据选择的数据库更新默认查询语句
+                if (dbName === '报装') {
+                    sqlTextarea.value = "select * from v_bz_rp_project where PROJECT_CODE like #{code} and PROJECT_CODE like '%2024%' order by CREATE_TIME desc";
+                } else if (dbName === '一体化') {
+                    sqlTextarea.value = "select * from v_yth_project where PROJECT_STATUS = 'active' and CREATE_DATE >= '2024-01-01'";
+                } else if (dbName === '营收') {
+                    sqlTextarea.value = "select * from v_revenue_data where YEAR = 2024 and MONTH <= 3 order by REVENUE desc";
+                }
+            });
+            
+            // 存储过程开关
+            const storedProcSwitch = document.getElementById('stored-procedure');
+            storedProcSwitch.addEventListener('change', function() {
+                const sqlTextarea = document.getElementById('sql-query');
+                
+                if (this.checked) {
+                    sqlTextarea.value = "EXEC sp_get_project_data @projectCode = #{code}, @year = 2024";
+                } else {
+                    sqlTextarea.value = "select * from v_bz_rp_project where PROJECT_CODE like #{code} and PROJECT_CODE like '%2024%' order by CREATE_TIME desc";
+                }
+            });
+            
+            // 数据类型单选框切换
+            const apiRadio = document.querySelector('input[name="data-type"][value="api"]');
+            const dbRadio = document.querySelector('input[name="data-type"][value="database"]');
+            
+            apiRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    // 切换到API配置标签页
+                    tabBtns[0].click();
+                }
+            });
+            
+            dbRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    // 切换到数据库配置标签页
+                    tabBtns[1].click();
+                }
+            });
+            
+            // 数据库标签页的数据类型单选框
+            const apiRadioDb = document.querySelector('input[name="data-type-db"][value="api"]');
+            const dbRadioDb = document.querySelector('input[name="data-type-db"][value="database"]');
+            
+            apiRadioDb.addEventListener('change', function() {
+                if (this.checked) {
+                    // 切换到API配置标签页
+                    tabBtns[0].click();
+                }
+            });
+            
+            dbRadioDb.addEventListener('change', function() {
+                if (this.checked) {
+                    // 确保在数据库配置标签页
+                    if (!databaseTab.classList.contains('active')) {
+                        tabBtns[1].click();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
