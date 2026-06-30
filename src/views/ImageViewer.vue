@@ -50,7 +50,15 @@ export default {
           dateCom._config.defaultValue = days;
         }
       }
+    },
+      // 流程表单设计，子表不同列组件之间数据共享，过滤子表列
+    BpmForm2() {
+      console.log(this.selectValue, this.$Datas, 'date');
+      const dateCom = this.$Datas.find(item => item._config && item._config.label == '天数');
+        if (dateCom) {
+          dateCom._config.defaultValue = days;
+        }
     }
-  }
+  },
 };
 </script>

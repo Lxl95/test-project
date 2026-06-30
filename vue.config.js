@@ -10,7 +10,7 @@ module.exports = {
       alias: {
         '@': path.resolve(__dirname, 'src')
       }
-    }
+    },
   },
   runtimeCompiler: true,
   chainWebpack: config => {

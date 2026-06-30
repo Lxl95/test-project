@@ -432,6 +432,24 @@ const routes = [
     }
   },
   {
+    path: '/UserSelectAPP',
+    name: 'UserSelectAPP',
+    component: () => import('../views/工程详情/UserSelectAPP.vue'),
+    meta: {
+      name: 'UserSelectAPP',
+      title: 'APP参与人员选择'
+    }
+  },
+  {
+    path: '/uploadPreview',
+    name: 'uploadPreview',
+    component: () => import('../views/工程详情/uploadPreview.vue'),
+    meta: {
+      name: 'uploadPreview',
+      title: 'APP上传缩略图'
+    }
+  },
+  {
     path: '/CodePrint',
     name: 'CodePrint',
     component: () => import('../views/弹框分步骤打印编码/CodePrint.vue'),
@@ -440,6 +458,43 @@ const routes = [
       title: '弹框分步骤打印'
     }
   },
+  {
+    path: '/TZHS',
+    name: 'TZHS',
+    component: () => import('../views/会审邀请/TZHS.vue'),
+    meta: {
+      name: 'TZHS',
+      title: '图纸会审'
+    }
+  },
+  {
+    path: '/RqEcharts',
+    name: 'RqEcharts',
+    component: () => import('../views/工程详情/RqEcharts.vue'),
+    meta: {
+      name: 'RqEcharts',
+      title: '工程统计'
+    }
+  },
+  {
+    path: '/KqDk',
+    name: 'KqDk',
+    component: () => import('../views/工程详情/KqDk.vue'),
+    meta: {
+      name: 'KqDk',
+      title: '考勤签到'
+    }
+  },
+  {
+    path: '/EXCEl',
+    name: 'EXCEl',
+    component: () => import('../views/Excel/Excel.vue'),
+    meta: {
+      name: 'EXCEl',
+      title: '导出EXCEl'
+    }
+  },
+
 ];
 
 const router = new VueRouter({
