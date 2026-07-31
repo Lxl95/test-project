@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue2 - 固定列 + 展开行完整跨列</title>
+    <!-- 引入 Vue 2 & Element UI -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js">
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <script src="https://unpkg.com/element-ui/lib/index.js">
+    </script>
+    <style>
+        /* 全局重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        #app {
+            width: 100%;
+            max-width: 1300px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+            padding: 24px 20px 30px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d2129;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h2 .badge {
+            font-size: 13px;
+            font-weight: 400;
+            background: #ecf5ff;
+            color: #409eff;
+            padding: 0 16px;
+            border-radius: 20px;
+            line-height: 26px;
+        }
+        .header .tip {
+            font-size: 14px;
+            color: #86909c;
+            background: #f7f8fa;
+            padding: 4px 16px;
+            border-radius: 20px;
+        }
+        .header .tip i {
+            margin-right: 4px;
+        }
+
+        /* ============================================================
+               核心：消除固定列对展开行的遮挡，实现完整跨列显示
+               ============================================================ */
+        /* 1. 让展开行的单元格成为相对定位的层，并提高 z-index */
+        .el-table__expanded-cell {
+            position: relative !important;
+            z-index: 999 !important;
+            /* 确保内容不被固定列遮挡 */
+            overflow: visible !important;
+            /* 让内部溢出可见 */
+            background-color: #ffffff !important;
+            /* 覆盖固定列背景 */;
+        }
+
+        /* 2. 固定列容器允许内容溢出，并降低 z-index，使其位于展开行下方 */
+        .el-table__fixed,
+        .el-table__fixed-right {
+            overflow: visible !important;
+            z-index: 1 !important;
+            /* 低于展开行的 999 */;
+        }
+
+        /* 3. 固定列内部的包裹层也允许溢出，避免裁剪展开行内容 */
+        .el-table__fixed-body-wrapper,
+        .el-table__fixed-right-body-wrapper {
+            overflow: visible !important;
+        }
+
+        /* 4. 固定列中的单元格保持背景，避免透明，但展开行会覆盖，无需额外处理 */
+        /* 5. 让展开行的内容区域背景白，并有一定内边距，美观 */
+        .expand-content {
+            background: #fafbfc;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border: 1px solid #e9ebef;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+        .expand-content .title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1d2129;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed #dcdfe6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .expand-content .title .tag {
+            font-size: 12px;
+            font-weight: 400;
+            background: #ecf5ff;
+            color: #409eff;
+            padding: 0 12px;
+            border-radius: 12px;
+            line-height: 22px;
+        }
+        .expand-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 8px 20px;
+        }
+        .expand-item {
+            display: flex;
+            align-items: baseline;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 4px 0;
+            border-bottom: 1px solid #f0f1f3;
+        }
+        .expand-item .label {
+            flex-shrink: 0;
+            width: 70px;
+            color: #86909c;
+            font-weight: 500;
+        }
+        .expand-item .value {
+            color: #1d2129;
+            word-break: break-all;
+            flex: 1;
+        }
+        .expand-item .value--long {
+            background: #f7f8fa;
+            padding: 0 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .expand-item .value .status-tag {
+            display: inline-block;
+            padding: 0 12px;
+            height: 24px;
+            line-height: 24px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 52px;
+        }
+        .status-tag.active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-tag.pending {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .status-tag.done {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .status-tag.closed {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        /* 操作按钮 */
+        .action-btns .el-button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* 表格内文本截断（固定列和非固定列均适用） */
+        .truncate-text {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: keep-all;
+        }
+        .el-table .cell .truncate-text {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 展开行内的文本不截断，完整显示 */
+        .expand-content .value {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        /* 底部控制区 */
+        .footer-tools {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .footer-tools .info {
+            font-size: 14px;
+            color: #86909c;
+        }
+        .footer-tools .info strong {
+            color: #1d2129;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+            #app {
+                padding: 16px 12px;
+            }
+            .expand-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h2 {
+                font-size: 17px;
+            }
+            .header .tip {
+                font-size: 12px;
+                padding: 2px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                // 模拟数据（包含长文本）
+                tableData: [{
+                    id: 'A-1001',
+                    name: '张伟 · 高级产品经理',
+                    description: '负责核心业务线的产品规划与需求分析，主导了多个从0到1的项目落地，具备丰富的B端产品经验。',
+                    remark: '近期专注于AI赋能方向，推动智能决策模块的迭代升级。',
+                    status: '进行中',
+                    createTime: '2026-01-15 09:30'
+                }, {
+                    id: 'A-1002',
+                    name: '李娜 · 技术架构师',
+                    description: '全栈技术架构设计与技术选型，微服务治理与性能优化，主导过日活千万级系统的架构升级。',
+                    remark: '目前正在研究云原生与Serverless架构在业务中的落地实践。',
+                    status: '已完成',
+                    createTime: '2026-01-12 14:20'
+                }, {
+                    id: 'A-1003',
+                    name: '王强 · 运营负责人',
+                    description: '用户增长策略制定与执行，活动运营与数据分析，擅长通过精细化运营提升用户留存率。',
+                    remark: 'Q2季度重点推进会员体系与积分商城项目。',
+                    status: '待审核',
+                    createTime: '2026-01-10 11:45'
+                }, {
+                    id: 'A-1004',
+                    name: '陈敏 · 资深前端工程师',
+                    description: '负责前端架构设计与组件库建设，推动团队工程化与标准化，具备丰富的可视化大屏开发经验。',
+                    remark: '近期在研究WebAssembly与前端性能优化方向。',
+                    status: '进行中',
+                    createTime: '2026-01-08 16:10'
+                }, {
+                    id: 'A-1005',
+                    name: '赵磊 · 数据科学专家',
+                    description: '机器学习模型开发与优化，数据挖掘与特征工程，主导过推荐系统与风控模型的落地。',
+                    remark: '正在探索大语言模型在垂直领域的微调与应用。',
+                    status: '已关闭',
+                    createTime: '2026-01-05 08:50'
+                }, {
+                    id: 'A-1006',
+                    name: '孙晓 · 项目经理 (PMP)',
+                    description: '负责跨部门项目协调与进度管控，敏捷流程推行与风险管理，确保项目按时高质交付。',
+                    remark: '目前同时推进3个中大型项目，资源协调是关键挑战。',
+                    status: '待审核',
+                    createTime: '2026-01-03 13:25'
+                }],
+                // 当前展开的行 key 数组（使用 id 作为唯一标识）
+                expandRowKeys: []
+            };
+        },
+        methods: {
+            // 切换展开/收起
+            handleExpandChange(row, expanded) {
+                const index = this.expandRowKeys.indexOf(row.id);
+                if (expanded) {
+                    if (index === -1) this.expandRowKeys.push(row.id);
+                } else {
+                    if (index !== -1) this.expandRowKeys.splice(index, 1);
+                }
+            },
+            // 全部展开
+            expandAll() {
+                this.expandRowKeys = this.tableData.map(row => row.id);
+            },
+            // 全部收起
+            collapseAll() {
+                this.expandRowKeys = [];
+            },
+            // 状态样式映射
+            getStatusClass(status) {
+                const map = {
+                    '进行中': 'active',
+                    '已完成': 'done',
+                    '待审核': 'pending',
+                    '已关闭': 'closed'
+                };
+                return map[status] || '';
+            },
+            handleEdit(row) {
+                this.$message.info(`编辑：${row.name}`);
+            },
+            handleDelete(row) {
+                this.$message.warning(`删除：${row.name}`);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue2 + Element 高级查询</title>
+    <!-- 引入 Vue2 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js">
+    </script>
+    <!-- 引入 Element UI -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.14/lib/theme-chalk/index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.14/lib/index.js">
+    </script>
+    <style>
+        /* ===== 全局重置 & 基础样式 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* ===== 主卡片 ===== */
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 36px 40px 40px;
+            transition: box-shadow 0.3s;
+        }
+        .app-container:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #ebeef5;
+        }
+        .app-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #303133;
+            letter-spacing: 0.5px;
+        }
+        .app-header h2 i {
+            color: #409eff;
+            margin-right: 8px;
+        }
+        .app-header .hint {
+            font-size: 13px;
+            color: #909399;
+        }
+
+        /* ===== 条件组容器（弹框内） ===== */
+        .condition-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            background: #fafbfc;
+            border-radius: 8px;
+            border: 1px solid #e4e7ed;
+            transition: all 0.25s;
+        }
+        .condition-group:hover {
+            border-color: #c0c4cc;
+            background: #f8f9fb;
+        }
+        .condition-group .group-index {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: #409eff;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+        }
+        .condition-group .el-select {
+            flex: 1;
+            min-width: 0;
+        }
+        .condition-group .el-select .el-input__inner {
+            background: #fff;
+        }
+        .condition-group .btn-delete {
+            flex-shrink: 0;
+            margin-left: 4px;
+        }
+
+        /* ===== 弹框底部工具栏 ===== */
+        .dialog-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            border-top: 1px dashed #dcdfe6;
+            margin-top: 4px;
+        }
+        .dialog-toolbar .left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .dialog-toolbar .count-badge {
+            font-size: 13px;
+            color: #606266;
+        }
+        .dialog-toolbar .count-badge span {
+            color: #409eff;
+            font-weight: 700;
+        }
+
+        /* ===== 空状态占位 ===== */
+        .empty-tip {
+            text-align: center;
+            padding: 32px 0 20px;
+            color: #909399;
+            font-size: 14px;
+        }
+        .empty-tip i {
+            font-size: 40px;
+            color: #d0d4d9;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* ===== 弹框自定义 ===== */
+        .el-dialog__body {
+            padding: 20px 24px 12px;
+        }
+        .el-dialog__footer {
+            padding: 12px 24px 20px;
+            border-top: 1px solid #ebeef5;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 20px 16px;
+            }
+            .condition-group {
+                flex-wrap: wrap;
+                padding: 12px 14px;
+            }
+            .condition-group .group-index {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+            .condition-group .el-select {
+                flex: 1 1 100%;
+                min-width: 120px;
+            }
+            .condition-group .btn-delete {
+                margin-left: auto;
+            }
+            .dialog-toolbar {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .dialog-toolbar .left {
+                flex-wrap: wrap;
+            }
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- ============================================================ -->
+        <!-- 主界面 -->
+        <!-- ============================================================ -->
+        <div class="app-container">
+            <div class="app-header">
+                <h2>
+                    <i class="el-icon-search"></i> 查询面板
+                </h2>
+                <span class="hint">
+                    已选 <strong>{{ conditions.length }}</strong> 组条件
+                </span>
+            </div>
+
+            <div style="display: flex; justify-content: center; padding: 28px 0 16px;">
+                <el-button
+                type="primary"
+                size="large"
+                icon="el-icon-more"
+                @click="dialogVisible = true"
+                >
+                更多
+            </el-button>
+        </div>
+
+        <p style="text-align: center; color: #909399; font-size: 13px; margin-top: 4px;">
+            点击「更多」按钮，在弹出的窗口中添加多组查询条件
+        </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 弹框：高级查询 -->
+    <!-- ============================================================ -->
+    <el-dialog
+    title="🔍 高级查询"
+    :visible.sync="dialogVisible"
+    width="820px"
+    :close-on-click-modal="false"
+    @close="onDialogClose"
+    >
+    <!-- ---- 条件组列表 ---- -->
+    <div v-if="conditions.length === 0" class="empty-tip">
+        <i class="el-icon-document"></i>
+        暂无查询条件，点击下方「添加条件」创建
+    </div>
+
+    <div
+    v-for="(cond, idx) in conditions"
+    :key="idx"
+    class="condition-group"
+    >
+    <!-- 序号 -->
+    <span class="group-index">{{ idx + 1 }}</span>
+
+    <!-- 类别 -->
+    <el-select
+    v-model="cond.categoryId"
+    placeholder="请选择类别"
+    @change="onCategoryChange(idx)"
+    clearable
+    filterable
+    >
+    <el-option
+    v-for="cat in categories"
+    :key="cat.id"
+    :label="cat.name"
+    :value="cat.id"
+    />
+</el-select>
+
+<!-- 类别属性 -->
+<el-select
+v-model="cond.attributeId"
+placeholder="请选择属性"
+@change="onAttributeChange(idx)"
+clearable
+filterable
+:disabled="!cond.categoryId"
+>
+<el-option
+v-for="attr in getAttributeList(idx)"
+:key="attr.id"
+:label="attr.name"
+:value="attr.id"
+/>
+</el-select>
+
+<!-- 属性值 -->
+<el-select
+v-model="cond.value"
+placeholder="请选择值"
+clearable
+filterable
+:disabled="!cond.attributeId"
+>
+<el-option
+v-for="val in getValueList(idx)"
+:key="val"
+:label="val"
+:value="val"
+/>
+</el-select>
+
+<!-- 删除按钮 -->
+<el-button
+class="btn-delete"
+type="danger"
+icon="el-icon-delete"
+circle
+size="small"
+:disabled="conditions.length <= 1"
+@click="removeCondition(idx)"
+/>
+</div>
+
+<!-- ---- 底部工具栏 ---- -->
+<div class="dialog-toolbar">
+    <div class="left">
+        <el-button
+        type="primary"
+        plain
+        icon="el-icon-plus"
+        size="small"
+        @click="addCondition"
+        >
+        添加条件
+    </el-button>
+    <span class="count-badge">
+        共 <span>{{ conditions.length }}</span> 组
+    </span>
+</div>
+<el-button
+type="text"
+size="small"
+icon="el-icon-refresh"
+@click="resetAll"
+:disabled="conditions.length === 0"
+>
+重置全部
+</el-button>
+</div>
+
+<!-- ---- 底部按钮 ---- -->
+<span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取消</el-button>
+    <el-button type="primary" @click="handleConfirm">确 定</el-button>
+</span>
+</el-dialog>
+</div>
+
+<!-- ============================================================ -->
+<!-- JavaScript -->
+<!-- ============================================================ -->
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            // ---------- 弹框显隐 ----------
+            dialogVisible: false,
+
+            // ---------- 条件组数据 ----------
+            // 每个组：{ categoryId, attributeId, value }
+            conditions: [
+                { categoryId: null, attributeId: null, value: null }
+            ],
+
+            // ---------- 静态数据 ----------
+            // 1. 类别列表
+            categories: [
+                { id: 1, name: '商品' },
+                { id: 2, name: '用户' },
+                { id: 3, name: '订单' },
+                { id: 4, name: '物流' },
+            ],
+
+            // 2. 属性列表（按类别 ID 分组）
+            attributeMap: {
+                1: [
+                    { id: 11, name: '商品名称' },
+                    { id: 12, name: '商品价格' },
+                    { id: 13, name: '商品库存' },
+                    { id: 14, name: '商品品牌' },
+                ],
+                2: [
+                    { id: 21, name: '用户名' },
+                    { id: 22, name: '用户等级' },
+                    { id: 23, name: '注册时间' },
+                    { id: 24, name: '手机号' },
+                ],
+                3: [
+                    { id: 31, name: '订单状态' },
+                    { id: 32, name: '订单金额' },
+                    { id: 33, name: '下单时间' },
+                    { id: 34, name: '支付方式' },
+                ],
+                4: [
+                    { id: 41, name: '物流公司' },
+                    { id: 42, name: '运单号' },
+                    { id: 43, name: '发货时间' },
+                ],
+            },
+
+            // 3. 属性值列表（按属性 ID 分组）
+            valueMap: {
+                11: ['苹果', '香蕉', '橙子', '葡萄', '西瓜'],
+                12: ['100', '200', '300', '400', '500'],
+                13: ['50', '100', '200', '500', '1000'],
+                14: ['华为', '小米', '苹果', '三星', 'OPPO'],
+                21: ['张三', '李四', '王五', '赵六', '孙七'],
+                22: ['VIP', '普通', '黄金', '钻石', '铂金'],
+                23: ['2024-01-01', '2024-02-01', '2024-03-01', '2024-04-01'],
+                24: ['13800001111', '13800002222', '13800003333'],
+                31: ['待支付', '已支付', '已发货', '已完成', '已取消'],
+                32: ['1000', '2000', '3000', '5000', '10000'],
+                33: ['2024-01-01', '2024-02-01', '2024-03-01'],
+                34: ['微信支付', '支付宝', '银行卡', '现金'],
+                41: ['顺丰', '圆通', '中通', '韵达', 'EMS'],
+                42: ['SF123456', 'YT789012', 'ZT345678', 'YD901234'],
+                43: ['2024-01-01', '2024-02-01', '2024-03-01'],
+            },
+        },
+
+        methods: {
+            // ---------- 获取某组的属性列表 ----------
+            getAttributeList(idx) {
+                const cond = this.conditions[idx];
+                if (!cond || !cond.categoryId) return [];
+                return this.attributeMap[cond.categoryId] || [];
+            },
+
+            // ---------- 获取某组的值列表 ----------
+            getValueList(idx) {
+                const cond = this.conditions[idx];
+                if (!cond || !cond.attributeId) return [];
+                return this.valueMap[cond.attributeId] || [];
+            },
+
+            // ---------- 类别变更：清空该组的属性和值 ----------
+            onCategoryChange(idx) {
+                const cond = this.conditions[idx];
+                // 清空属性
+                cond.attributeId = null;
+                // 清空值
+                cond.value = null;
+            },
+
+            // ---------- 属性变更：清空该组的值 ----------
+            onAttributeChange(idx) {
+                const cond = this.conditions[idx];
+                // 清空值
+                cond.value = null;
+            },
+
+            // ---------- 新增一组条件 ----------
+            addCondition() {
+                this.conditions.push({
+                    categoryId: null,
+                    attributeId: null,
+                    value: null,
+                });
+            },
+
+            // ---------- 删除一组条件 ----------
+            removeCondition(idx) {
+                if (this.conditions.length <= 1) {
+                    this.$message.warning('至少保留一组条件');
+                    return;
+                }
+                this.conditions.splice(idx, 1);
+                this.$message.success('已删除该组条件');
+            },
+
+            // ---------- 重置全部 ----------
+            resetAll() {
+                if (this.conditions.length === 0) return;
+                this.$confirm('确定要清空所有条件吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }).then(() => {
+                    // 重置为仅一组空条件
+                    this.conditions = [
+                        { categoryId: null, attributeId: null, value: null }
+                    ];
+                    this.$message.success('已重置所有条件');
+                }).catch(() => {});
+            },
+
+            // ---------- 确认：提交查询条件 ----------
+            handleConfirm() {
+                // 过滤出已填写的条件（至少选择了类别）
+                const validConditions = this.conditions.filter(
+                    c => c.categoryId !== null && c.categoryId !== undefined
+                );
+
+                if (validConditions.length === 0) {
+                    this.$message.warning('请至少选择一组完整的查询条件');
+                    return;
+                }
+
+                // 构建用于展示的数据
+                const result = validConditions.map(c => {
+                    const category = this.categories.find(cat => cat.id === c.categoryId);
+                    const attrs = this.getAttributeList(this.conditions.indexOf(c));
+                    const attribute = attrs.find(a => a.id === c.attributeId);
+                    return {
+                        category: category ? category.name : '未知',
+                        attribute: attribute ? attribute.name : '未选择',
+                        value: c.value || '未选择',
+                        raw: { ...c },
+                    };
+                });
+
+                console.log('===== 提交的查询条件 =====');
+                console.log(JSON.stringify(result, null, 2));
+                console.log('原始数据：', validConditions);
+
+                this.$message.success({
+                    message: `已提交 ${result.length} 组条件，请查看控制台输出`,
+                    duration: 3000,
+                });
+
+                // 这里可以触发父组件事件，或进行接口请求
+                // this.$emit('submit', validConditions);
+
+                // 演示：弹窗显示概要
+                const summary = result.map((r, i) =>
+                    `第${i+1}组：${r.category} → ${r.attribute} → ${r.value}`
+                ).join('\n');
+                this.$alert(
+                    summary || '（无有效条件）',
+                    '查询条件概要',
+                    { confirmButtonText: '知道了' }
+                );
+
+                // 不关闭弹框，让用户继续编辑
+                // 如需关闭可取消注释：
+                // this.dialogVisible = false;
+            },
+
+            // ---------- 弹框关闭时回调 ----------
+            onDialogClose() {
+                // 可在此做清理工作
+                console.log('弹框已关闭');
+            },
+        },
+
+        // ---------- 计算属性：可选的增强功能 ----------
+        computed: {
+            // 统计有效条件组数（至少选了类别）
+            validCount() {
+                return this.conditions.filter(
+                    c => c.categoryId !== null && c.categoryId !== undefined
+                ).length;
+            },
+        },
+
+        // ---------- 生命周期 ----------
+        mounted() {
+            console.log('Vue2 + Element 高级查询已启动');
+            console.log('初始条件组：', this.conditions);
+        },
+    });
+</script>
+
+</body>
+</html>

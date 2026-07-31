@@ -494,6 +494,33 @@ const routes = [
       title: '导出EXCEl'
     }
   },
+  {
+    path: '/tableExpandRow',
+    name: 'tableExpandRow',
+    component: () => import('../views/tableExpandRow/tableExpandRow.vue'),
+    meta: {
+      name: 'tableExpandRow',
+      title: '自定义表格展开行'
+    }
+  },
+  {
+    path: '/jeeplusBpmnNew',
+    name: 'jeeplusBpmnNew',
+    component: () => import('../views/jeeplusBpmn/new.vue'),
+    meta: {
+      name: 'jeeplusBpmnNew',
+      title: 'jeeplusBpmnNew'
+    }
+  },
+  {
+    path: '/BF',
+    name: 'BF',
+    component: () => import('../views/泵房总览/index.vue'),
+    meta: {
+      name: 'BF',
+      title: 'BF'
+    }
+  },
 
 ];
 

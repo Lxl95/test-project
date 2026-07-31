@@ -9,3 +9,13 @@ PopupMenu：默认在鼠标点击 ContentPad 中的扳手图表时出现，主�
 
 1. 左侧工具栏配置 node_modules\jeeplus-bpmn\lib\features\palette\PaletteProvider.js
 2. ContentPad配置， node_modules\bpmn-js\lib\features\context-pad\ContextPadProvider.js
+3. 左侧工具栏添加泳道 node_modules\jeeplus-bpmn\lib\features\palette\PaletteProvider.js
+'create.participant-expanded': {
+      group: 'collaboration',
+      className: 'bpmn-icon-participant',
+      title: translate('Create Pool/Participant'),
+      action: {
+        dragstart: createParticipant,
+        click: createParticipant
+      }
+    },
